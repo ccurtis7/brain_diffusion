@@ -24,3 +24,6 @@ therapeutics.
     - create interactive features for the histogram so we can select bin size
 6. standard_error
     - calculate the standard error of Deff for any time scales
+7. particle_visualization
+    - using Bokeh, create interactive plot/movie visuals to see the
+    trajectories of selected particles over time
