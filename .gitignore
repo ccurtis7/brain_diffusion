@@ -61,5 +61,7 @@ target/
 #Ipython Notebook
 .ipynb_checkpoints
 
-#csv files
+#csv and Excel files
 *.csv
+*.xls
+*.xlsx
