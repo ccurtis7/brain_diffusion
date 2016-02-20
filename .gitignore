@@ -63,3 +63,4 @@ target/
 
 #csv files
 *.csv
+*.html
