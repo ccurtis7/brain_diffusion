@@ -64,6 +64,5 @@ target/
 #csv and Excel files
 *.csv
 *.html
-=======
 *.xls
 *.xlsx
