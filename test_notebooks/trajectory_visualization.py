@@ -1,6 +1,8 @@
 from bokeh.io import output_notebook
 from bokeh.plotting import figure, show, gridplot
 import numpy as np
+import os
+import csv
 
 
 def download_trajectory_data(file):
@@ -35,6 +37,46 @@ def download_trajectory_data(file):
         file_csv = False
         print('File is not a .csv file')
         return (file_csv, file_exists)
+
+
+def sample_data():
+    """
+    Generates sample .csv file for unit tests.
+    """
+
+    if os.path.exists('sample_data.csv'):
+        print(filename, 'already exists')
+
+    else:
+        c = csv.writer(open("sample_data.csv"), "wb")
+
+        # Indicate that the 1st row
+        # should be treated as column names:
+        c.put_HasColumnNames(True)
+
+        c.SetColumnName(0, "year")
+        c.SetColumnName(1, "color")
+        c.SetColumnName(2, "country")
+        c.SetColumnName(3, "food")
+
+        c.SetCell(0, 0, "2001")
+        c.SetCell(0, 1, "red")
+        c.SetCell(0, 2, "France")
+        c.SetCell(0, 3, "cheese")
+
+        c.SetCell(1, 0, "2005")
+        c.SetCell(1, 1, "blue")
+        c.SetCell(1, 2, "United States")
+        c.SetCell(1, 3, "hamburger")
+
+        #  Write the CSV to a string and display:
+        csvDoc = c.saveToString()
+        print(csvDoc)
+
+        #  Save the CSV to a file:
+        success = c.SaveFile("sample_data.csv")
+        if not success:
+            print(c.lastErrorText())
 
 
 def define_xydata(dataset, sets):
