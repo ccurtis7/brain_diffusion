@@ -1,18 +1,42 @@
-''' Unit tests for prime.py '''
+''' Unit tests for trajectory_visualization.py '''
 
+import numpy as np
 import unittest
-import wget
-import urllib
-from pronto_utils import download_if_needed2, get_pronto_data, plot_daily_totals, get_trip_data, get_weather_data, trips_by_date, get_trips_and_weather
-from pronto_utils import remove_data
+from trajectory_visualization import define_xydata
 
-class TestDownloadifNeeded(unittest.TestCase):
 
-  # Test whether the file was downloaded
-  def testPlotSuccessful(self):
-    # 1 website
-    result = plot_daily_totals()
-    self.assertTrue(result[0])
+class TestSplitSuccessful(unittest.TestCase):
+
+    # Test whether the data was successfully split into desired # of datasets.
+    def testSplitSuccessfulTrue(self):
+        # First test dataset
+        a = np.arange(220).reshape(10, 22)
+        time, Runs = define_xydata(a, 1)
+        result = type(time) == type(a)
+        self.assertTrue(result)
+
+        # Second test dataset
+        time1, Runs1 = define_xydata(a, 6)
+        result2 = type(time) == type(a)
+        self.assertTrue(result2)
+
+    # Test error message for the case where set is not a whole number
+    def testWholeNumberFalse(self):
+        a = np.arange(220).reshape(10, 22)
+        result = define_xydata(a, 1.5)
+        self.assertFalse(result[1])
+
+    # Test error message for the case where set is too large for dataset
+    def testJustRightSetsFalse(self):
+        a = np.arange(220).reshape(10, 22)
+        result = define_xydata(a, 7)
+        self.assertFalse(result[2])
+
+    # Test error message for the case where dataset is not correct format
+    def testCorrectSplitsFalse(self):
+        a = np.arange(210).reshape(10, 21)
+        result = define_xydata(a, 1)
+        self.assertFalse(result[3])
 
 
 if __name__ == '__main__':

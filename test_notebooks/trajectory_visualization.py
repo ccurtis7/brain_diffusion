@@ -1,11 +1,13 @@
 from bokeh.io import output_notebook
 from bokeh.plotting import figure, show, gridplot
 import numpy as np
+import os
+import csv
 
 
 def download_trajectory_data(file):
     """
-    Downloads a specified datafile and converts to a numpy array.  If the file
+    Converts a .csv file dataset to a numpy array.  If the file
     is not a .csv file or the file does not exist, returns an error message.
 
     Inputs: .csv file.
@@ -24,15 +26,57 @@ def download_trajectory_data(file):
             name = np.genfromtxt(file, delimiter=",")
             name = np.delete(name, 0, 0)
         except:
-            return 'File does not exist'
+            print('File does not exist')
             file_exists = False
+            return (file_csv, file_exists)
         else:
             return name
 
     else:
 
         file_csv = False
-        return 'File is not a .csv file'
+        print('File is not a .csv file')
+        return (file_csv, file_exists)
+
+
+def sample_data():
+    """
+    Generates sample .csv file for unit tests.
+    """
+
+    if os.path.exists('sample_data.csv'):
+        print(filename, 'already exists')
+
+    else:
+        c = csv.writer(open("sample_data.csv"), "wb")
+
+        # Indicate that the 1st row
+        # should be treated as column names:
+        c.put_HasColumnNames(True)
+
+        c.SetColumnName(0, "year")
+        c.SetColumnName(1, "color")
+        c.SetColumnName(2, "country")
+        c.SetColumnName(3, "food")
+
+        c.SetCell(0, 0, "2001")
+        c.SetCell(0, 1, "red")
+        c.SetCell(0, 2, "France")
+        c.SetCell(0, 3, "cheese")
+
+        c.SetCell(1, 0, "2005")
+        c.SetCell(1, 1, "blue")
+        c.SetCell(1, 2, "United States")
+        c.SetCell(1, 3, "hamburger")
+
+        #  Write the CSV to a string and display:
+        csvDoc = c.saveToString()
+        print(csvDoc)
+
+        #  Save the CSV to a file:
+        success = c.SaveFile("sample_data.csv")
+        if not success:
+            print(c.lastErrorText())
 
 
 def define_xydata(dataset, sets):
@@ -55,13 +99,47 @@ def define_xydata(dataset, sets):
             trajectory arrays ((n-1)/3 columns)
     """
 
-    times = dataset[:, 0]
-    Run = dict()
+    splitsuccess = True
+    wholenumber = True
+    justrightsets = True
+    correctformat = True
 
-    for num in range(1, sets + 1):
-        Run["Run" + str(num)] = dataset[:, 3 * num - 2: 3 * num + 1]
+    # Check that dataset is of the correct format.
+    if (dataset.shape[1] - 1) % 3 == 0:
 
-    return times, Run
+        # Check that the desire number of sets matches the given dataset.
+        if sets < (dataset.shape[1] - 1)/3:
+
+            # Check that the desired number of sets is a whole number.
+            if float(sets).is_integer():
+
+                # Define the times column.
+                times = dataset[:, 0]
+                Run = dict()
+
+                # Build individual trajectory datasets.
+                for num in range(1, sets + 1):
+                    Run["Run" + str(num)] = dataset[:, 3 * num - 2: 3 * num + 1]
+
+                return times, Run
+
+            else:
+                print("The variable 'sets' must be a whole number.")
+                wholenumber = False
+                splitsuccess = False
+                return (splitsuccess, wholenumber, justrightsets, correctformat)
+
+        else:
+            print("Desired number of sets is too high for this dataset.")
+            justrightsets = False
+            splitsuccess = False
+            return (splitsuccess, wholenumber, justrightsets, correctformat)
+
+    else:
+        print("Data is not of right format.  Dataset must have 1 time column and sets of 3 columns of trajectory data.")
+        correctformat = False
+        splitsuccess = False
+        return (splitsuccess, wholenumber, justrightsets, correctformat)
 
 
 def shift_trajectory(xydata):
