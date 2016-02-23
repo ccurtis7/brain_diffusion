@@ -39,44 +39,25 @@ def download_trajectory_data(file):
         return (file_csv, file_exists)
 
 
-def sample_data():
+def csv_writer():
     """
-    Generates sample .csv file for unit tests.
+    Creates a sample dataset for unit tests called output.csv
     """
-
-    if os.path.exists('sample_data.csv'):
-        print(filename, 'already exists')
+    if os.path.exists('output.csv'):
+        print('output.csv', 'already exists')
 
     else:
-        c = csv.writer(open("sample_data.csv"), "wb")
 
-        # Indicate that the 1st row
-        # should be treated as column names:
-        c.put_HasColumnNames(True)
-
-        c.SetColumnName(0, "year")
-        c.SetColumnName(1, "color")
-        c.SetColumnName(2, "country")
-        c.SetColumnName(3, "food")
-
-        c.SetCell(0, 0, "2001")
-        c.SetCell(0, 1, "red")
-        c.SetCell(0, 2, "France")
-        c.SetCell(0, 3, "cheese")
-
-        c.SetCell(1, 0, "2005")
-        c.SetCell(1, 1, "blue")
-        c.SetCell(1, 2, "United States")
-        c.SetCell(1, 3, "hamburger")
-
-        #  Write the CSV to a string and display:
-        csvDoc = c.saveToString()
-        print(csvDoc)
-
-        #  Save the CSV to a file:
-        success = c.SaveFile("sample_data.csv")
-        if not success:
-            print(c.lastErrorText())
+        data = ["first_name,last_name,city".split(","),
+                "Tyrese,Hirthe,Strackeport".split(","),
+                "Jules,Dicki,Lake Nickolasville".split(","),
+                "Dedric,Medhurst,Stiedemannberg".split(",")
+                ]
+        path = "output.csv"
+        with open(path, "w") as csv_file:
+            writer = csv.writer(csv_file, delimiter=',')
+            for line in data:
+                writer.writerow(line)
 
 
 def define_xydata(dataset, sets):
@@ -171,7 +152,7 @@ def shift_trajectory(xydata):
 
     if not numerical:
 
-        return "Array contains data that isn't of type float64."
+        print("Array contains data that isn't of type float64.")
 
     else:
 
@@ -184,7 +165,7 @@ def shift_trajectory(xydata):
             xydata[:, 1] = xydata[:, 1] - x_mean
             xydata[:, 2] = xydata[:, 2] - y_mean
 
-            return "Trajectory successfully shifted."
+            print("Trajectory successfully shifted.")
 
         else:
 
@@ -198,12 +179,14 @@ def shift_trajectory(xydata):
 
                 justright = False
 
-                return "Array has more than three columns. May not yield correct results"
+                print()"Array has more than three columns. May not yield correct results")
 
             else:
 
                 justright = False
-                return "Array doesn't have enough columns"
+                print("Array doesn't have enough columns")
+
+    return (numerical, justright)
 
 
 def plot_trajectory(xydata, charttitle):
