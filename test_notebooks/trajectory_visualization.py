@@ -179,7 +179,7 @@ def shift_trajectory(xydata):
 
                 justright = False
 
-                print()"Array has more than three columns. May not yield correct results")
+                print("Array has more than three columns. May not yield correct results")
 
             else:
 
