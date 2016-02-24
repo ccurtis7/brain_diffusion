@@ -8,7 +8,7 @@ import pandas as pd
 import scipy
 from scipy import stats
 
-from bokeh.plotting import figure, show, gridplot
+from bokeh.plotting import figure, show
 import zipfile
 
 
@@ -50,7 +50,7 @@ def compute_geomean(df, ColumnName):
 
 
 # Create a column of mean MSDs for each particle type
-for title in columns:
+for title in columns2:
     compute_geomean(msd, title)
 # Reset the index to timepoints, converting from string to float
 msd = msd.set_index('Particle')
@@ -67,17 +67,17 @@ timepoint range, calculates Deff from mean MSD, plots a histogram of
 the list of Deffs, and gives a geometric mean Deff value for the time
 range specified.
 """
-def compute_plot_Deff(ParticleChemistry,tmin,tmax):
+def compute_hist_Deff(ParticleChemistry,tmin,tmax):
     # Trim out-of-time-range rows
     temp1_msd = msd[msd.index >= tmin]
     temp2_msd = temp1_msd[temp1_msd.index <= tmax]
     # Calculate Deffs for only the timepoints needed and add as a new
     # column
-    Defflist = []
+    Deff_list = []
     for i in range(0, len(temp2_msd)):
         index = temp2_msd.index[i]
-        Defflist.append(temp2_msd[ParticleChemistry + ' geo'][index]/(4*index**ALPHA))
-    temp2_msd['Deff'] = Defflist
+        Deff_list.append(temp2_msd[ParticleChemistry + ' geo'][index]/(4*index**ALPHA))
+    temp2_msd['Deff'] = Deff_list
     # Plot histogram and print mean Deff value
     # NOTE: Eventually I'll migrate the plot to bokeh; I'm using
     # matplotlib temporarily for ease of testing
@@ -86,4 +86,29 @@ def compute_plot_Deff(ParticleChemistry,tmin,tmax):
     plt.ylabel('Count')
     plt.show()
     Deff = scipy.stats.gmean(temp2_msd['Deff'])
-    print Deff
+    return Deff
+
+
+def compute_plot_all_Deff(tmin,tmax):
+    # Trim out-of-time-range rows
+    temp1_msd = msd[msd.index >= tmin]
+    temp2_msd = temp1_msd[temp1_msd.index <= tmax]
+    # Calculate Deffs for only the timepoints needed and add as a new
+    # column to a new dataframe
+    index = temp2_msd.index
+    Deffs = pd.DataFrame(index=index, columns=columns2)
+    avg_Deffs = pd.DataFrame(index=columns2)
+    avg_Deffs_temp = []
+    p = figure(tools='pan,box_zoom,reset,save', x_axis_label='MSD timepoint', y_axis_label='Deff')
+    for title in columns2:
+        single_Deff_list = []
+        for i in range(0, len(temp2_msd)):
+            index = temp2_msd.index[i]
+            single_Deff_list.append(temp2_msd[title + ' geo'][index]/(4*index**ALPHA))
+        Deffs[title] = single_Deff_list
+        avg_Deffs_temp.append(scipy.stats.gmean(Deffs[title]))
+        p.line(Deffs.index, Deffs[title], legend=title)
+    avg_Deffs['Deff'] = avg_Deffs_temp
+    show(p)
+    print Deffs
+    return avg_Deffs
