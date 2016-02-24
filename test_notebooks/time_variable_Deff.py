@@ -8,7 +8,7 @@ import pandas as pd
 import scipy
 from scipy import stats
 
-from bokeh.plotting import figure, show
+from bokeh.plotting import figure, output_file, show
 import zipfile
 
 
@@ -99,7 +99,8 @@ def compute_plot_all_Deff(tmin,tmax):
     Deffs = pd.DataFrame(index=index, columns=columns2)
     avg_Deffs = pd.DataFrame(index=columns2)
     avg_Deffs_temp = []
-    p = figure(tools='pan,box_zoom,reset,save', x_axis_label='MSD timepoint', y_axis_label='Deff')
+    output_file('Deffs_plot.html')
+    p = figure(tools='resize,pan,box_zoom,wheel_zoom,reset,save', x_axis_label='MSD timepoint', y_axis_label='Deff')
     for title in columns2:
         single_Deff_list = []
         for i in range(0, len(temp2_msd)):
@@ -109,6 +110,9 @@ def compute_plot_all_Deff(tmin,tmax):
         avg_Deffs_temp.append(scipy.stats.gmean(Deffs[title]))
         p.line(Deffs.index, Deffs[title], legend=title)
     avg_Deffs['Deff'] = avg_Deffs_temp
+    p.legend.label_text_font_size = '6pt'
+    # p.legend.label_width = 50
+    # p.legend.label_height = 6
     show(p)
     print Deffs
     return avg_Deffs
