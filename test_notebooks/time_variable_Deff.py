@@ -108,7 +108,7 @@ def compute_plot_all_Deff(tmin,tmax):
             single_Deff_list.append(temp2_msd[title + ' geo'][index]/(4*index**ALPHA))
         Deffs[title] = single_Deff_list
         avg_Deffs_temp.append(scipy.stats.gmean(Deffs[title]))
-        p.line(Deffs.index, Deffs[title], legend=title)
+        p.line(Deffs.index, Deffs[title], legend=title, line_color=(np.random.randint(256),np.random.randint(256),np.random.randint(256)))
     avg_Deffs['Deff'] = avg_Deffs_temp
     p.legend.label_text_font_size = '6pt'
     # p.legend.label_width = 50
