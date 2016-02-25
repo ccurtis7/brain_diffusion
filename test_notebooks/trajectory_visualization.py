@@ -85,20 +85,15 @@ def define_xydata(dataset, sets):
     justrightsets = True
     correctformat = True
 
-    # Check that dataset is of the correct format.
     if (dataset.shape[1] - 1) % 3 == 0:
 
-        # Check that the desire number of sets matches the given dataset.
         if sets < (dataset.shape[1] - 1)/3:
 
-            # Check that the desired number of sets is a whole number.
             if float(sets).is_integer():
 
-                # Define the times column.
                 times = dataset[:, 0]
                 Run = dict()
 
-                # Build individual trajectory datasets.
                 for num in range(1, sets + 1):
                     Run["Run" + str(num)] = dataset[:, 3 * num - 2: 3 * num + 1]
 
