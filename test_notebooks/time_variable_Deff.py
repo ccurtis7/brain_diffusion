@@ -156,7 +156,11 @@ def compute_plot_all_Deff(tmin,tmax):
     plots a line graph of all Deffs across the timepoint range, and
     gives geometric mean Deff values for each chemistry for the time
     range specified.
-    Note: tmin must be less than tmax.
+    Note: tmin must be less than tmax to get a timepoint range.  If,
+    however, the user requires a Deff calculated from a single
+    timepoint, he or she can input an equal tmin and tmax, and the
+    function will consider only the single closest timepoint (on the
+    later side) to the input.
 
     Inputs:
     tmin: a float representing the minimum timepoint the user wishes to
@@ -183,30 +187,33 @@ def compute_plot_all_Deff(tmin,tmax):
             tmin = 0.01
         # Trim out-of-time-range rows
         temp1_msd = msd[msd.index >= tmin]
-        temp2_msd = temp1_msd[temp1_msd.index <= tmax]
-        # Calculate Deffs for only the timepoints needed and add as a new
-        # column to a new dataframe
-        index = temp2_msd.index
-        Deffs = pd.DataFrame(index=index, columns=columns2)
-        avg_Deffs = pd.DataFrame(index=columns2)
-        avg_Deffs_temp = []
-        output_file('Deffs_plot.html')
-        p = figure(tools='resize,pan,box_zoom,wheel_zoom,reset,save', x_axis_label='MSD timepoint', y_axis_label='Deff')
-        for title in columns2:
-            single_Deff_list = []
-            for i in range(0, len(temp2_msd)):
-                index = temp2_msd.index[i]
-                single_Deff_list.append(temp2_msd[title + ' geo'][index]/(4*index**ALPHA))
-            # Add paricle-chemistry-specific Deff list to Deffs dataframe
-            Deffs[title] = single_Deff_list
-            # Add geometric mean Deff to what will become avg_Deffs
-            avg_Deffs_temp.append(scipy.stats.gmean(Deffs[title]))
-            p.line(Deffs.index, Deffs[title], legend=title, line_color=(np.random.randint(256),np.random.randint(256),np.random.randint(256)))
-        avg_Deffs['Deff'] = avg_Deffs_temp
-        p.legend.label_text_font_size = '6pt'
-        # p.legend.label_width = 50
-        # p.legend.label_height = 6
-        show(p)
-        # puke Deff lists while returning the much prettier avg_Deffs table
-        print Deffs
-        return avg_Deffs
+        if tmin == tmax:
+            temp2_msd = temp1_msd.head(1)
+        else:
+            temp2_msd = temp1_msd[temp1_msd.index <= tmax]
+            # Calculate Deffs for only the timepoints needed and add as a new
+            # column to a new dataframe
+            index = temp2_msd.index
+            Deffs = pd.DataFrame(index=index, columns=columns2)
+            avg_Deffs = pd.DataFrame(index=columns2)
+            avg_Deffs_temp = []
+            output_file('Deffs_plot.html')
+            p = figure(tools='resize,pan,box_zoom,wheel_zoom,reset,save', x_axis_label='MSD timepoint', y_axis_label='Deff')
+            for title in columns2:
+                single_Deff_list = []
+                for i in range(0, len(temp2_msd)):
+                    index = temp2_msd.index[i]
+                    single_Deff_list.append(temp2_msd[title + ' geo'][index]/(4*index**ALPHA))
+                # Add paricle-chemistry-specific Deff list to Deffs dataframe
+                Deffs[title] = single_Deff_list
+                # Add geometric mean Deff to what will become avg_Deffs
+                avg_Deffs_temp.append(scipy.stats.gmean(Deffs[title]))
+                p.line(Deffs.index, Deffs[title], legend=title, line_color=(np.random.randint(256),np.random.randint(256),np.random.randint(256)))
+            avg_Deffs['Deff'] = avg_Deffs_temp
+            p.legend.label_text_font_size = '6pt'
+            # p.legend.label_width = 50
+            # p.legend.label_height = 6
+            show(p)
+            # puke Deff lists while returning the much prettier avg_Deffs table
+            # print Deffs
+            return avg_Deffs
