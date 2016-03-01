@@ -188,7 +188,7 @@ def plot_trajectory(xydata, charttitle):
     """
     Plots a single 3-column numpy array of trajectory data (frames in column 1,
     x coordinates in column 2, y coordinates in column 3) within iPython
-    notebook.
+    notebook (must have run output_notebook() within the notebook).
 
     Note: MUST have run output_notebook in order to run successfully.
 
@@ -229,3 +229,30 @@ def plot_trajectory(xydata, charttitle):
 
             justright = False
             return "Array doesn't have enough columns"
+
+
+def sidebyside(xydata1, xydata2, charttitle1, charttitle2):
+
+    length1 = xydata1.shape[0]
+    width1 = xydata1.shape[1]
+
+    justright = True
+
+    length2 = xydata2.shape[0]
+    width2 = xydata2.shape[1]
+
+    if width1 == 3 AND width2 == 3:
+
+    x1 = xydata1[:, 1]
+    y1 = xydata1[:, 2]
+    x2 = xydata2[:, 1]
+    y2 = xydata2[:, 2]
+
+    s1 = figure(title=charttitle1, width=300, height=300, x_axis_label='x', y_axis_label='y')
+    s1.line(x1, y1, color='navy', line_width=2)
+
+    s2 = figure(title=charttitle2, width=300, height=300, x_range=s1.x_range, y_range=s1.y_range, x_axis_label='x', y_axis_label='y')
+    s2.line(x2, y2, color='firebrick', line_width=2)
+
+    p = gridplot([[s1, s2]])
+    show(p)
