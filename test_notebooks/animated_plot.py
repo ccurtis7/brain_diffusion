@@ -154,7 +154,7 @@ p = figure(title='PEG_PLGA15k_F68_R2_P81', title_text_font_size='13pt',
 # add a text renderer to out plot (no data yet)
 r = p.line(x=[], y=[], line_width=3, color='navy')
 
-session = push_session(curdoc())
+# session = push_session(curdoc())
 
 i = 0
 ds = r.data_source
@@ -166,11 +166,16 @@ def callback():
     ds.data['x'].append(xlist[i])
     ds.data['y'].append(ylist[i])
     ds.trigger('data', ds.data, ds.data)
-    i = i + 1
+    if i < xlist.shape[0] - 1:
+        i = i + 1
+    else:
+        i = 0
+        ds.data['x'] = []
+        ds.data['y'] = []
 
 # Adds a new data point every 67 ms.  Change at user's discretion.
 curdoc().add_periodic_callback(callback, 67)
 
-session.show()
+# session.show()
 
-session.loop_until_closed()
+# session.loop_until_closed()

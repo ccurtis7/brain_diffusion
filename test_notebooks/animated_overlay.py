@@ -86,38 +86,37 @@ def shift_trajectory(xydata):
 
 # Uploaded data from my local drive. Converts csv file to numpy array
 trajectory = np.genfromtxt('../sample_data/Sample_Trajectory_Data1.csv',
-            delimiter =",")
+                           delimiter=",")
 
 # Deletes the first row (the titles of the columns)
-trajectory=np.delete(trajectory, 0,0)
-
+trajectory = np.delete(trajectory, 0, 0)
 
 # Converts My large dataset into individual 3-column datasets and a time column
-time = trajectory[:,0]
+time = trajectory[:, 0]
 
-PLGA_4A_UP_R1_P25 = trajectory[:,1:4]
-PLGA_4A_P80_R1_P22 = trajectory[:,4:7]
-PLGA_15k_UP_R3_P5 = trajectory[:,7:10]
-PLGA_15k_P80_R3_P36 = trajectory[:,10:13]
-PLGA_4A_F68_R3_P15 = trajectory[:,13:16]
-PLGA_15k_F68_R3_P10 = trajectory[:,16:19]
-PLGA4A_5CHA_R3_P124 = trajectory[:,19:22]
-PLGA_15k_5CHA_R3_P50 = trajectory[:,22:25]
-PLGA_15k_2CHA_R2_P44 = trajectory[:,25:28]
-PLGA15k_05CHA_R3_P22 = trajectory[:,28:31]
-PEG_PLGA15k_P80_R3_P127 = trajectory[:,31:34]
-PEG_PLGA4A_F68_R3_P111 = trajectory[:,34:37]
-PEG_PLGA4A_P80_R1_P84 = trajectory[:,37:40]
-PEG_PLGA4A_UP_R1_P53 = trajectory[:,40:43]
-PEG_PLGA15k_2CHA_R2_P26 = trajectory[:,43:46]
-PEG_PLGA15k_5CHA_R2_P52 = trajectory[:,46:49]
-PEG_PLGA15k_UP_R3_P61 = trajectory[:,49:52]
-PEG_PLGA58k_5CHA_R2_P15 = trajectory[:,52:55]
-PEG_PLGA15k_F68_R2_P81 = trajectory[:,55:58]
-PLGA_15k_2CHA_R2_P37 = trajectory[:,58:61]
-PLGA_15k_PEG_2CHA_R2_P81 = trajectory[:,61:64]
-PLGA_15k_05CHA_R1_P45 = trajectory[:,64:67]
-PLGA_15k_PEG_05CHA_R3_P61 = trajectory[:,67:70]
+PLGA_4A_UP_R1_P25 = trajectory[:, 1:4]
+PLGA_4A_P80_R1_P22 = trajectory[:, 4:7]
+PLGA_15k_UP_R3_P5 = trajectory[:, 7:10]
+PLGA_15k_P80_R3_P36 = trajectory[:, 10:13]
+PLGA_4A_F68_R3_P15 = trajectory[:, 13:16]
+PLGA_15k_F68_R3_P10 = trajectory[:, 16:19]
+PLGA4A_5CHA_R3_P124 = trajectory[:, 19:22]
+PLGA_15k_5CHA_R3_P50 = trajectory[:, 22:25]
+PLGA_15k_2CHA_R2_P44 = trajectory[:, 25:28]
+PLGA15k_05CHA_R3_P22 = trajectory[:, 28:31]
+PEG_PLGA15k_P80_R3_P127 = trajectory[:, 31:34]
+PEG_PLGA4A_F68_R3_P111 = trajectory[:, 34:37]
+PEG_PLGA4A_P80_R1_P84 = trajectory[:, 37:40]
+PEG_PLGA4A_UP_R1_P53 = trajectory[:, 40:43]
+PEG_PLGA15k_2CHA_R2_P26 = trajectory[:, 43:46]
+PEG_PLGA15k_5CHA_R2_P52 = trajectory[:, 46:49]
+PEG_PLGA15k_UP_R3_P61 = trajectory[:, 49:52]
+PEG_PLGA58k_5CHA_R2_P15 = trajectory[:, 52:55]
+PEG_PLGA15k_F68_R2_P81 = trajectory[:, 55:58]
+PLGA_15k_2CHA_R2_P37 = trajectory[:, 58:61]
+PLGA_15k_PEG_2CHA_R2_P81 = trajectory[:, 61:64]
+PLGA_15k_05CHA_R1_P45 = trajectory[:, 64:67]
+PLGA_15k_PEG_05CHA_R3_P61 = trajectory[:, 67:70]
 
 shift_trajectory(PLGA_4A_UP_R1_P25)
 shift_trajectory(PEG_PLGA4A_UP_R1_P53)
@@ -153,8 +152,8 @@ shift_trajectory(PLGA_15k_05CHA_R1_P45)
 shift_trajectory(PLGA_15k_PEG_05CHA_R3_P61)
 
 # This is where the actual coding begins.
-a = PEG_PLGA15k_5CHA_R2_P52
-b = PLGA_15k_PEG_2CHA_R2_P81
+a = PLGA_15k_F68_R3_P10
+b = PEG_PLGA58k_5CHA_R2_P15
 xlist1 = a[:, 1]
 ylist1 = a[:, 2]
 xlist2 = b[:, 1]
@@ -166,19 +165,20 @@ ylow = min(min(ylist1), min(ylist2))
 yhigh = max(max(ylist1), max(ylist2))
 
 # create a plot and style its properties.  Change chart title here.
-p = figure( title='PLGA_15k_UP_R3_P5 and PEG_PLGA15k_UP_R3_P61',
-          title_text_font_size='13pt', x_range=(xlow, xhigh),
-          y_range=(ylow, yhigh),)
+p = figure(title='PLGA_15k_UP_R3_P5 and PEG_PLGA15k_UP_R3_P61',
+           title_text_font_size='13pt', x_range=(xlow, xhigh),
+           y_range=(ylow, yhigh),)
 
 # add a text renderer to out plot (no data yet)
 r1 = p.line(x=[], y=[], line_width=3, color='navy')
 r2 = p.line(x=[], y=[], line_width=3, color='firebrick')
 
-session = push_session(curdoc())
+# session = push_session(curdoc())
 
 i = 0
 ds1 = r1.data_source
 ds2 = r2.data_source
+
 
 # create a callback that will add a number in a random location
 def callback():
@@ -189,11 +189,18 @@ def callback():
     ds2.data['x'].append(xlist2[i])
     ds2.data['y'].append(ylist2[i])
     ds2.trigger('data', ds2.data, ds2.data)
-    i = i + 1
+    if i < xlist1.shape[0] - 1:
+        i = i + 1
+    else:
+        i = 0
+        ds1.data['x'] = []
+        ds1.data['y'] = []
+        ds2.data['x'] = []
+        ds2.data['y'] = []
 
-#Adds a new data point every 67 ms.  Change at user's discretion.
+# Adds a new data point every 67 ms.  Change at user's discretion.
 curdoc().add_periodic_callback(callback, 67)
 
-session.show()
+# session.show()
 
-session.loop_until_closed()
+# session.loop_until_closed()

@@ -1,10 +1,10 @@
 """
-This py file creates an animated plot of 2 trajectory datasets each in the
-format of a 3-column numpy array (frames, x-coordinate, y-coordinate).  In order
-to run the code, users must input their own data into the file.  I have included
-some code that calls my data from a csv file locally and converts it to the
-desired numpy format, but this must be replaced with users' own data in order to
-work. These portions have been annotated below.
+This py file creates an animated plot of trajectory data in the format of a 3-
+column numpy array (frames, x-coordinate, y-coordinate).  In order to run the
+code, users must input their own data into the file.  I have included some code
+that calls my data from a csv file locally and converts it to the desired
+numpy format, but this must be replaced with users' own data in order to work.
+These portions have been annotated below.
 
 In order to run the file once the correct data has been included, open up a
 command line and change to the correct directory.  Run "python animated_plot"
@@ -17,7 +17,7 @@ import numpy as np
 from bokeh.plotting import figure, show, gridplot, vplot, hplot, curdoc
 from bokeh.io import output_notebook
 from bokeh.client import push_session
-
+from bokeh.core.state import State as new
 
 def shift_trajectory(xydata):
     """
@@ -91,7 +91,6 @@ trajectory = np.genfromtxt('../sample_data/Sample_Trajectory_Data1.csv',
 # Deletes the first row (the titles of the columns)
 trajectory = np.delete(trajectory, 0, 0)
 
-
 # Converts My large dataset into individual 3-column datasets and a time column
 time = trajectory[:, 0]
 
@@ -120,93 +119,61 @@ PLGA_15k_05CHA_R1_P45 = trajectory[:, 64:67]
 PLGA_15k_PEG_05CHA_R3_P61 = trajectory[:, 67:70]
 
 shift_trajectory(PLGA_4A_UP_R1_P25)
-shift_trajectory(PEG_PLGA4A_UP_R1_P53)
-
 shift_trajectory(PLGA_4A_P80_R1_P22)
-shift_trajectory(PEG_PLGA4A_P80_R1_P84)
-
 shift_trajectory(PLGA_15k_UP_R3_P5)
-shift_trajectory(PEG_PLGA15k_UP_R3_P61)
-
 shift_trajectory(PLGA_15k_P80_R3_P36)
-shift_trajectory(PEG_PLGA15k_P80_R3_P127)
-
 shift_trajectory(PLGA_4A_F68_R3_P15)
-shift_trajectory(PEG_PLGA4A_F68_R3_P111)
-
 shift_trajectory(PLGA_15k_F68_R3_P10)
-shift_trajectory(PEG_PLGA15k_F68_R2_P81)
-
 shift_trajectory(PLGA4A_5CHA_R3_P124)
-shift_trajectory(PEG_PLGA58k_5CHA_R2_P15)
-
 shift_trajectory(PLGA_15k_5CHA_R3_P50)
+shift_trajectory(PLGA_15k_2CHA_R2_P44)
+shift_trajectory(PLGA15k_05CHA_R3_P22)
+shift_trajectory(PEG_PLGA15k_P80_R3_P127)
+shift_trajectory(PEG_PLGA4A_F68_R3_P111)
+shift_trajectory(PEG_PLGA4A_P80_R1_P84)
+shift_trajectory(PEG_PLGA4A_UP_R1_P53)
+shift_trajectory(PEG_PLGA15k_2CHA_R2_P26)
 shift_trajectory(PEG_PLGA15k_5CHA_R2_P52)
+shift_trajectory(PEG_PLGA15k_UP_R3_P61)
+shift_trajectory(PEG_PLGA58k_5CHA_R2_P15)
+shift_trajectory(PEG_PLGA15k_F68_R2_P81)
 shift_trajectory(PLGA_15k_2CHA_R2_P37)
 shift_trajectory(PLGA_15k_PEG_2CHA_R2_P81)
-
-shift_trajectory(PEG_PLGA15k_2CHA_R2_P26)
-shift_trajectory(PLGA_15k_2CHA_R2_P44)
-
-shift_trajectory(PLGA15k_05CHA_R3_P22)
 shift_trajectory(PLGA_15k_05CHA_R1_P45)
 shift_trajectory(PLGA_15k_PEG_05CHA_R3_P61)
 
 # This is where the actual coding begins.
-a = PLGA_15k_UP_R3_P5
-b = PEG_PLGA15k_UP_R3_P61
-xlist1 = a[:, 1]
-ylist1 = a[:, 2]
-xlist2 = b[:, 1]
-ylist2 = b[:, 2]
-
-xlow = min(min(xlist1), min(xlist2))
-xhigh = max(max(xlist1), max(xlist2))
-ylow = min(min(ylist1), min(ylist2))
-yhigh = max(max(ylist1), max(ylist2))
+b = np.random.rand(300, 3)
+xlist = b[:, 1]
+ylist = b[:, 2]
 
 # create a plot and style its properties.  Change chart title here.
-p1 = figure(title='PLGA_15k_UP_R3_P5 and PEG_PLGA15k_UP_R3_P61',
-            title_text_font_size='13pt', x_range=(xlow, xhigh),
-            y_range=(ylow, yhigh), toolbar_location=None)
-p2 = figure(title='PLGA_15k_UP_R3_P5 and PEG_PLGA15k_UP_R3_P61',
-            title_text_font_size='13pt', x_range=(xlow, xhigh),
-            y_range=(ylow, yhigh), toolbar_location=None)
+p = figure(title='PEG_PLGA15k_F68_R2_P81', title_text_font_size='13pt',
+           x_range=(min(xlist), max(xlist)), y_range=(min(ylist), max(ylist)),)
 
 # add a text renderer to out plot (no data yet)
-r1 = p1.line(x=[], y=[], line_width=3, color='navy')
-r2 = p2.line(x=[], y=[], line_width=3, color='firebrick')
+r = p.line(x=[], y=[], line_width=3, color='navy')
 
-# session = push_session(curdoc())
+session = push_session(curdoc())
 
 i = 0
-ds1 = r1.data_source
-ds2 = r2.data_source
+ds = r.data_source
 
 
 # create a callback that will add a number in a random location
 def callback():
     global i
-    ds1.data['x'].append(xlist1[i])
-    ds1.data['y'].append(ylist1[i])
-    ds1.trigger('data', ds1.data, ds1.data)
-    ds2.data['x'].append(xlist2[i])
-    ds2.data['y'].append(ylist2[i])
-    ds2.trigger('data', ds2.data, ds2.data)
-    if i < xlist1.shape[0] - 1:
+    ds.data['x'].append(xlist[i])
+    ds.data['y'].append(ylist[i])
+    ds.trigger('data', ds.data, ds.data)
+    if i < xlist.shape[0] - 1:
         i = i + 1
     else:
-        i = 0
-        ds1.data['x'] = []
-        ds1.data['y'] = []
-        ds2.data['x'] = []
-        ds2.data['y'] = []
+        new.reset()
 
 # Adds a new data point every 67 ms.  Change at user's discretion.
 curdoc().add_periodic_callback(callback, 67)
 
-p = gridplot([[p1, p2]])
+session.show()
 
-# session.show()
-
-# session.loop_until_closed()
+session.loop_until_closed()
