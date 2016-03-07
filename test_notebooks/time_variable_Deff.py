@@ -12,6 +12,8 @@ import pandas as pd
 import scipy
 from scipy import stats
 
+from bokeh.charts import Histogram
+from bokeh.models import Range1d
 from bokeh.plotting import figure, output_file, show
 import zipfile
 
@@ -134,15 +136,21 @@ def compute_hist_Deff(particle_chemistry,tmin,tmax):
             # Calculate Deff using the conventional relationship between
             # MSD and Deff
             Deff_list.append(temp2_msd[particle_chemistry + ' geo'][index]/(4*index**ALPHA))
-        temp2_msd[particle_chemistry + 'Deff'] = Deff_list
+        temp2_msd[particle_chemistry + ' Deff'] = Deff_list
         # Plot histogram and print mean Deff value
         # NOTE: Eventually I'll migrate the plot to bokeh; I'm using
         # matplotlib temporarily for ease of testing
-        plt.hist(temp2_msd[particle_chemistry + 'Deff'], bins=15)
-        plt.xlabel('Calculated Deffs')
-        plt.ylabel('Count')
-        plt.show()
-        Deff = scipy.stats.gmean(temp2_msd[particle_chemistry + 'Deff'])
+        # plt.hist(temp2_msd[particle_chemistry + ' Deff'], bins=15)
+        # plt.xlabel('Calculated Deffs')
+        # plt.ylabel('Count')
+        # plt.show()
+        output_file('Deffs_hist.html')
+        # p = figure(tools='resize,pan,box_zoom,wheel_zoom,reset,save', x_axis_label='Calculated Deffs', y_axis_label='Count')
+        p = Histogram(temp2_msd[particle_chemistry + ' Deff'], bins=15, legend=True)
+        # p.xaxis.bounds = (0, 0.1)
+        p.x_range = Range1d(0,0.015)
+        show(p)
+        Deff = scipy.stats.gmean(temp2_msd[particle_chemistry + ' Deff'])
         return Deff
 
 
