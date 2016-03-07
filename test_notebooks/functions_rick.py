@@ -1,4 +1,6 @@
 """
+This edit is to push the pull request.
+
 This file extracts the effective diffusion (Deff) and particle property (PP) data from the
 zipfile and assigns them to variables. Size and zeta potential are then
 categorized into designated increments, adding 2 columns to the particle
@@ -17,9 +19,18 @@ deff = pd.read_csv(file_handle1)
 file_handle2 = zf.open('Particle_Properties_Data.csv')
 prop = pd.read_csv(file_handle2)
 
-# Function with input of central size and tick range to create categories of
-# particle size
 def set_size_range(center,tick):
+    """
+    Function with input of "central" and "tick" as float  to create categories of
+    particle size. 
+    "center" designates the central measure of the NP in nanometers.
+    "tick" designates the range in nanometers between two ticks of the x-axis.
+    For example, "center: 100, tick: 10" sets 100 as the central measurement, and
+    creates category divides at 90, 80, 70...110, 120, 130...etc.
+    Function returns "sizes": a new dataframe with the low and high size limits of
+    each tick range, and a third column of categories.
+    For example, 'Low': 70, 'High': 80, 'Size_Range': '70 to 80'
+    """
     low = center
     while low > min(prop['Size']):
         low = low-tick
@@ -40,9 +51,16 @@ def set_size_range(center,tick):
                 (sizes['Low'][x], sizes['High'][x])
     return sizes
 
-# Function with input of tick range to create categories of zeta potential from
-# lowest value to zero
 def set_zp_range(tick):
+    """
+    Function with input of tick range to create categories of zeta potential from
+    lowest value to zero. These range from some negative value to zero.
+    "tick" designates the range in zeta potential (zp) between two ticks of the x-axis.
+    For example, "tick: 2" creates category divides at 0, -2, -4, -6...etc.
+    Function returns "zp": a new dataframe with the low and high zp limits of
+    each tick range, and a third column of categories.
+    For example, 'Low': -4, 'High': -2, 'ZP_Range': '-4 to -2'
+    """
     low = 0
     while low > min(prop['Zeta_Potential']):
         low = low-tick

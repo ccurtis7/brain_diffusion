@@ -2,7 +2,8 @@
 
 import numpy as np
 import unittest
-from trajectory_visualization import download_trajectory_data
+import os
+from trajectory_visualization import download_trajectory_data, csv_writer
 
 
 class TestDownloadTrajectory(unittest.TestCase):
@@ -12,7 +13,8 @@ class TestDownloadTrajectory(unittest.TestCase):
     def testDownloadSuccessfulTrue(self):
         # Test csv File
         a = np.arange(220).reshape(10, 22)
-        name = download_trajectory_data('unit_test_data.csv')
+        csv_writer()
+        name = download_trajectory_data('output.csv')
         result = type(name) == type(a)
         self.assertTrue(result)
 
