@@ -14,7 +14,7 @@ from scipy import stats
 
 from bokeh.charts import Histogram
 from bokeh.models import Range1d
-from bokeh.plotting import figure, output_file, show
+from bokeh.plotting import figure, hplot, output_file, show
 import zipfile
 
 
@@ -145,9 +145,7 @@ def compute_hist_Deff(particle_chemistry,tmin,tmax):
         # plt.ylabel('Count')
         # plt.show()
         output_file('Deffs_hist.html')
-        # p = figure(tools='resize,pan,box_zoom,wheel_zoom,reset,save', x_axis_label='Calculated Deffs', y_axis_label='Count')
-        p = Histogram(temp2_msd[particle_chemistry + ' Deff'], bins=15, legend=True)
-        # p.xaxis.bounds = (0, 0.1)
+        p = Histogram(temp2_msd[particle_chemistry + ' Deff'], bins=15, legend=False)
         p.x_range = Range1d(0,0.015)
         show(p)
         Deff = scipy.stats.gmean(temp2_msd[particle_chemistry + ' Deff'])
@@ -205,8 +203,9 @@ def compute_plot_all_Deff(tmin,tmax,particle_chemistry):
             Deffs = pd.DataFrame(index=index, columns=columns2)
             avg_Deffs = pd.DataFrame(index=columns2)
             avg_Deffs_temp = []
-            output_file('Deffs_plot.html')
-            p = figure(tools='resize,pan,box_zoom,wheel_zoom,reset,save', x_axis_label='MSD timepoint', y_axis_label='Deff')
+            maxes = []
+            output_file('Deffs_hist_and_line_plot.html')
+            p = figure(tools='resize,pan,box_zoom,wheel_zoom,reset,save', width=950, height=600, x_axis_label='MSD timepoint', y_axis_label='Deff')
             for title in columns2:
                 single_Deff_list = []
                 for i in range(0, len(temp2_msd)):
@@ -214,18 +213,25 @@ def compute_plot_all_Deff(tmin,tmax,particle_chemistry):
                     single_Deff_list.append(temp2_msd[title + ' geo'][index]/(4*index**ALPHA))
                 # Add particle-chemistry-specific Deff list to Deffs dataframe
                 Deffs[title] = single_Deff_list
+                maxes.append(np.max(single_Deff_list))
                 # Add geometric mean Deff to what will become avg_Deffs
                 avg_Deffs_temp.append(scipy.stats.gmean(Deffs[title]))
                 if title == particle_chemistry:
-                    p.line(Deffs.index, Deffs[title], line_width=5, legend=title, line_color=(np.random.randint(256),np.random.randint(256),np.random.randint(256)))
+                    p.line(Deffs.index, Deffs[title], line_width=5, line_dash=(15,10), legend=title, line_color=(np.random.randint(256),np.random.randint(256),np.random.randint(256)))
                     print particle_chemistry + ' Deff = ' + str(scipy.stats.gmean(Deffs[title]))
                 else:
                     p.line(Deffs.index, Deffs[title], line_width=1, legend=title, line_color=(np.random.randint(256),np.random.randint(256),np.random.randint(256)))
             avg_Deffs['Deff'] = avg_Deffs_temp
             p.legend.label_text_font_size = '6pt'
+            # xrangemax = (tmax-tmin)/5
+            p.x_range = Range1d(tmin,tmax+(tmax-tmin)/5)
             # p.legend.label_width = 50
             # p.legend.label_height = 6
-            show(p)
+            h = Histogram(Deffs[particle_chemistry], width=300, height=250, bins=15, legend=False)
+            h.x_range = Range1d(0,np.max(maxes))
+            # h.xaxis.major_label_orientation = "vertical"
+            f = hplot(h,p)
+            show(f)
             # puke Deff lists while returning the much prettier avg_Deffs table
             # print Deffs
             return avg_Deffs
