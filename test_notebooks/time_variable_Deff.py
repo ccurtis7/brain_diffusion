@@ -146,7 +146,7 @@ def compute_hist_Deff(particle_chemistry,tmin,tmax):
         return Deff
 
 
-def compute_plot_all_Deff(tmin,tmax):
+def compute_plot_all_Deff(tmin,tmax,particle_chemistry):
     """
     Calculates and plots all Deffs in the timepoint range.
 
@@ -204,11 +204,15 @@ def compute_plot_all_Deff(tmin,tmax):
                 for i in range(0, len(temp2_msd)):
                     index = temp2_msd.index[i]
                     single_Deff_list.append(temp2_msd[title + ' geo'][index]/(4*index**ALPHA))
-                # Add paricle-chemistry-specific Deff list to Deffs dataframe
+                # Add particle-chemistry-specific Deff list to Deffs dataframe
                 Deffs[title] = single_Deff_list
                 # Add geometric mean Deff to what will become avg_Deffs
                 avg_Deffs_temp.append(scipy.stats.gmean(Deffs[title]))
-                p.line(Deffs.index, Deffs[title], legend=title, line_color=(np.random.randint(256),np.random.randint(256),np.random.randint(256)))
+                if title == particle_chemistry:
+                    p.line(Deffs.index, Deffs[title], line_width=5, legend=title, line_color=(np.random.randint(256),np.random.randint(256),np.random.randint(256)))
+                    print particle_chemistry + ' Deff = ' + str(scipy.stats.gmean(Deffs[title]))
+                else:
+                    p.line(Deffs.index, Deffs[title], line_width=1, legend=title, line_color=(np.random.randint(256),np.random.randint(256),np.random.randint(256)))
             avg_Deffs['Deff'] = avg_Deffs_temp
             p.legend.label_text_font_size = '6pt'
             # p.legend.label_width = 50
