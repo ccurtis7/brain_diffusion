@@ -1,8 +1,9 @@
 from bokeh.io import output_notebook
-from bokeh.plotting import figure, show, gridplot
+from bokeh.plotting import figure, show, gridplot, hplot, vplot, curdoc
 import numpy as np
 import os
 import csv
+from bokeh.client import push_session
 
 
 def download_trajectory_data(file):
@@ -205,8 +206,8 @@ def plot_trajectory(xydata, charttitle):
 
         x = xydata[:, 1]
         y = xydata[:, 2]
-        p = figure(title=charttitle, title_text_font_size='8pt',
-                   width=300, height=300, x_axis_label='x', y_axis_label='y')
+        p = figure(title=charttitle, title_text_font_size='13pt',
+                   width=300, height=300)
         p.line(x, y, line_width=2)
         show(p)
 
@@ -218,14 +219,179 @@ def plot_trajectory(xydata, charttitle):
 
             x = xydata[:, 1]
             y = xydata[:, 2]
-            p = figure(title=charttitle, title_text_font_size='8pt',
-                       width=300, height=300, x_axis_label='x', y_axis_label='y')
+            p = figure(title=charttitle, title_text_font_size='13pt',
+                       width=300, height=300)
             p.line(x, y, line_width=2)
             show(p)
 
-            return "Array has more than three columns.  May not yield correct results"
+            print("Array has more than three columns.  May not yield correct results")
 
         else:
 
             justright = False
-            return "Array doesn't have enough columns"
+            print("Array doesn't have enough columns")
+
+    return justright
+
+
+def sidebyside(xydata1, xydata2, charttitle1, charttitle2):
+    """
+    Plots two 3-column numpy arrays of trajectory data (frames in column 1, x
+    coordinates in column 2, y coordinates in column 3) next to each other in
+    iPython notebook.
+
+    Note: MUST have run output_notebook in order to run successfully.
+
+    Input: 2 numpy arrays, 2 chart titles (strings)
+    Output: displays trajectory plots inline.
+    """
+    length1 = xydata1.shape[0]
+    width1 = xydata1.shape[1]
+
+    justright = True
+
+    length2 = xydata2.shape[0]
+    width2 = xydata2.shape[1]
+
+    if width1 == 3 and width2 == 3:
+
+        x1 = xydata1[:, 1]
+        y1 = xydata1[:, 2]
+        x2 = xydata2[:, 1]
+        y2 = xydata2[:, 2]
+
+        s1 = figure(title=charttitle1, title_text_font_size='13pt', width=300, height=300)
+        s1.line(x1, y1, color='navy', line_width=2)
+
+        s2 = figure(title=charttitle2, title_text_font_size='13pt', width=300, height=300, x_range=s1.x_range, y_range=s1.y_range)
+        s2.line(x2, y2, color='firebrick', line_width=2)
+
+        p = gridplot([[s1, s2]])
+        show(p)
+
+    else:
+
+        justright = False
+
+        if width1 > 3 or width2 > 3:
+
+            x1 = xydata1[:, 1]
+            y1 = xydata1[:, 2]
+            x2 = xydata2[:, 1]
+            y2 = xydata2[:, 2]
+
+            s1 = figure(title=charttitle1, width=300, height=300, x_axis_label='x', y_axis_label='y')
+            s1.line(x1, y1, color='navy', line_width=2)
+
+            s2 = figure(title=charttitle2, width=300, height=300, x_range=s1.x_range, y_range=s1.y_range, x_axis_label='x', y_axis_label='y')
+            s2.line(x2, y2, color='firebrick', line_width=2)
+
+            p = hplot(s1, s2)
+            show(p)
+
+            print("At least one of the given arrays has more than three columns.  May not yield corect results.")
+
+        else:
+
+            print("One of the given arrays has less than three columns.  Data could not be plotted.")
+
+    return justright
+
+
+def overlay(xydata1, xydata2, charttitle):
+    """
+    Plots two 3-column numpy arrays of trajectory data (frames in column 1, x
+    coordinates in column 2, y coordinates in column 3) superimposed upon each
+    other in iPython notebook.
+
+    Note: MUST have run output_notebook in order to run successfully.
+
+    Input: 2 numpy arrays, 2 chart titles (strings)
+    Output: displays trajectory plots inline.
+    """
+
+    length1 = xydata1.shape[0]
+    width1 = xydata1.shape[1]
+
+    justright = True
+
+    length2 = xydata2.shape[0]
+    width2 = xydata2.shape[1]
+
+    if width1 == 3 and width2 == 3:
+
+        x1 = xydata1[:, 1]
+        y1 = xydata1[:, 2]
+        x2 = xydata2[:, 1]
+        y2 = xydata2[:, 2]
+
+        p = figure(title=charttitle, title_text_font_size='9pt', width=300, height=300, x_axis_label='x', y_axis_label='y')
+
+        p.line(x1, y1, line_width=2, color='navy')
+        p.line(x2, y2, line_width=2, color='firebrick')
+
+        show(p)
+
+    else:
+
+        justright = False
+
+        if width1 > 3 or width2 > 3:
+
+            x1 = xydata1[:, 1]
+            y1 = xydata1[:, 2]
+            x2 = xydata2[:, 1]
+            y2 = xydata2[:, 2]
+
+            p = figure(title=charttitle, width=300, height=300)
+
+            p.line(x1, y1, line_width=2, color='navy')
+            p.line(x2, y2, line_width=2, color='firebrick')
+
+            show(p)
+
+            print("At least one of the given arrays has more than three columns.  May not yield corect results.")
+
+        else:
+
+            print("One of the given arrays has less than three columns.  Data could not be plotted.")
+
+    return justright
+
+
+def animated_plot(xydata):
+    """
+    I haven't been able to generate a working code for an animated plot function
+    and I haven't been able to find out why.  Whenever I try, I get an error
+    message saying that index cannot be defined.
+    """
+    b = xydata
+    xlist = b[:, 1]
+    ylist = b[:, 2]
+
+    # create a plot and style its properties
+    p = figure(x_range=(min(xlist), max(xlist)), y_range=(min(ylist), max(ylist)), toolbar_location=None)
+
+    # add a text renderer to out plot (no data yet)
+    r = p.line(x=[], y=[], line_width=3, color='navy')
+
+    session = push_session(curdoc())
+
+    index = 0
+    ds = r.data_source
+
+    # create a callback that will add the next point of the trajectory data
+    def callback():
+        global index
+        ds.data['x'].append(xlist[index])
+        ds.data['y'].append(ylist[index])
+        ds.trigger('data', ds.data, ds.data)
+        index = index + 1
+
+    curdoc().add_periodic_callback(callback, 67)
+
+    # open the document in a browser
+    session.show()
+
+    # run forever
+    session.loop_until_closed()
