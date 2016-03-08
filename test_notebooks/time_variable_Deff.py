@@ -1,12 +1,11 @@
 """
-A script for calculating Deff (effective diffusion coefficient) based
-on MSD (mean squared displacement) data from t=0 to a user-selected
-timepoint or range of timepoints (in which case Deff is a geometric
-mean).  Make sure to import the entire file: this performs the time-
-intensive cleaning of the data independent of the plotting/computing
-function, making for faster plot tweaks.
+A script for calculating and visualizing Deff (effective diffusion
+coefficient) based on MSD (mean squared displacement) data from t=0 to
+a user-selected timepoint or range of timepoints (in which case Deff is
+a geometric mean).  Make sure to import the entire file: this performs
+the time-intensive cleaning of the data independent of the
+plotting/computing function, making for faster plot tweaks.
 """
-from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy
@@ -109,14 +108,14 @@ def compute_hist_Deff(particle_chemistry,tmin,tmax):
     consider in the Deff calculation
 
     Outputs:
-    A matplotlib histogram of Deff values calculated from the particle
-    chemistry's MSD of each timepoint within the range
+    A bokeh charts histogram of Deff values calculated from the
+    particle chemistry's MSD of each timepoint within the range
     Deff: a single float representing the geometric mean Deff value for
     the timepoint range specified
 
     Side effects:
-    The trimmed MSD dataset is appended to include the list of Deffs
-    for the given particle chemistry.
+    The trimmed MSD dataset is appended (with a new column) to include
+    the list of Deffs for the given particle chemistry.
     """
     # Verify time range validity
     if tmin < 0 or tmax > 20:
@@ -128,26 +127,24 @@ def compute_hist_Deff(particle_chemistry,tmin,tmax):
         # Trim out-of-time-range rows
         temp1_msd = msd[msd.index >= tmin]
         temp2_msd = temp1_msd[temp1_msd.index <= tmax]
-        # Calculate Deffs for only the timepoints needed and add as a new
-        # column
+        # Calculate Deffs for only the timepoints needed and add as a
+        # new column
         Deff_list = []
         for i in range(0, len(temp2_msd)):
             index = temp2_msd.index[i]
-            # Calculate Deff using the conventional relationship between
-            # MSD and Deff
+            # Calculate Deff using the conventional relationship
+            # between MSD and Deff
             Deff_list.append(temp2_msd[particle_chemistry + ' geo'][index]/(4*index**ALPHA))
         temp2_msd[particle_chemistry + ' Deff'] = Deff_list
         # Plot histogram and print mean Deff value
-        # NOTE: Eventually I'll migrate the plot to bokeh; I'm using
-        # matplotlib temporarily for ease of testing
-        # plt.hist(temp2_msd[particle_chemistry + ' Deff'], bins=15)
-        # plt.xlabel('Calculated Deffs')
-        # plt.ylabel('Count')
-        # plt.show()
         output_file('Deffs_hist.html')
         p = Histogram(temp2_msd[particle_chemistry + ' Deff'], bins=15, legend=False)
+        # Set range of x axis to reflect approximate range of all Deff
+        # values
         p.x_range = Range1d(0,0.015)
         show(p)
+        # There's only one Deff column from this function: calculate
+        # geometric mean Deff from that column
         Deff = scipy.stats.gmean(temp2_msd[particle_chemistry + ' Deff'])
         return Deff
 
@@ -172,14 +169,22 @@ def compute_plot_all_Deff(tmin,tmax,particle_chemistry):
     tmin: a float representing the minimum timepoint the user wishes to
     consider in the Deff calculation
     tmax: a float representing the maximum timepoint the user wishes to
-    consider in the Deff calculation
+    consider in the Deff calculation (make this the same as tmin if a
+    single-timepoint Deff is desired)
+    particle_chemistry: a string matching the column title of the
+    particle chemistry which is to be emphasized: the Deffs of this
+    chemistry will be plotted on the histogram, bolded/dashed on the
+    line plot, and printed in the form of a geometric mean.
 
     Outputs:
+    A bokeh histogram of Deffs for the inputted chemistry, on the same
+    figure as the below line plot (this figure defaults to fit nicely
+    in a 1280x800 screen, but plots can be resized as needed)
     A bokeh line plot of Deffs for all particle chemistries across the
-    timepoint range
-    Deffs (printed): a fresh pandas dataframe of the same dimensions
-    (timepoints [trimmed] and columns) as the MSD dataframe, containing
-    Deffs instead of MSDs
+    timepoint range, with emphasized chemistry bolded/dashed
+    Deff of inputted chemistry: a geometric mean of the Deffs between
+    tmin and tmax for the inputted chemistry, printed in the form of
+    a string within an explanatory sentence
     avg_Deffs: a fresh pandas dataframe indexed with the columns
     (particle chemistries) of the MSD dataframe, containing single
     geometric mean Deff values for each particle chemistry
@@ -193,29 +198,36 @@ def compute_plot_all_Deff(tmin,tmax,particle_chemistry):
             tmin = 0.01
         # Trim out-of-time-range rows
         temp1_msd = msd[msd.index >= tmin]
+        # Trim to a length of 1 if user desires single-timepoint Deff
         if tmin == tmax:
             temp2_msd = temp1_msd.head(1)
         else:
             temp2_msd = temp1_msd[temp1_msd.index <= tmax]
-            # Calculate Deffs for only the timepoints needed and add as a new
-            # column to a new dataframe
+            # Calculate Deffs for only the timepoints needed and add as
+            # a new column to a new dataframe
             index = temp2_msd.index
             Deffs = pd.DataFrame(index=index, columns=columns2)
             avg_Deffs = pd.DataFrame(index=columns2)
             avg_Deffs_temp = []
             maxes = []
+            # Lay the foundation for the bokeh figure
             output_file('Deffs_hist_and_line_plot.html')
-            p = figure(tools='resize,pan,box_zoom,wheel_zoom,reset,save', width=950, height=600, x_axis_label='MSD timepoint', y_axis_label='Deff')
+            p = figure(tools='resize,pan,box_zoom,wheel_zoom,reset,save', width=950, height=650, x_axis_label='MSD timepoint', y_axis_label='Deff')
+            # Cycle through each particle chemistry and fill in Deffs
+            # and avg_Deffs
             for title in columns2:
                 single_Deff_list = []
                 for i in range(0, len(temp2_msd)):
                     index = temp2_msd.index[i]
                     single_Deff_list.append(temp2_msd[title + ' geo'][index]/(4*index**ALPHA))
-                # Add particle-chemistry-specific Deff list to Deffs dataframe
+                # Add particle-chemistry-specific Deff list to Deffs
+                # dataframe
                 Deffs[title] = single_Deff_list
                 maxes.append(np.max(single_Deff_list))
                 # Add geometric mean Deff to what will become avg_Deffs
                 avg_Deffs_temp.append(scipy.stats.gmean(Deffs[title]))
+                # Create a special bold/dashed line for the inputted
+                # chemistry only, and generate the printed output
                 if title == particle_chemistry:
                     p.line(Deffs.index, Deffs[title], line_width=5, line_dash=(15,10), legend=title, line_color=(np.random.randint(256),np.random.randint(256),np.random.randint(256)))
                     print particle_chemistry + ' Deff = ' + str(scipy.stats.gmean(Deffs[title]))
@@ -223,15 +235,15 @@ def compute_plot_all_Deff(tmin,tmax,particle_chemistry):
                     p.line(Deffs.index, Deffs[title], line_width=1, legend=title, line_color=(np.random.randint(256),np.random.randint(256),np.random.randint(256)))
             avg_Deffs['Deff'] = avg_Deffs_temp
             p.legend.label_text_font_size = '6pt'
-            # xrangemax = (tmax-tmin)/5
+            # The line plot x-axis range is calibrated to include all
+            # of the desired data and the legend with no overlap
             p.x_range = Range1d(tmin,tmax+(tmax-tmin)/5)
-            # p.legend.label_width = 50
-            # p.legend.label_height = 6
-            h = Histogram(Deffs[particle_chemistry], width=300, height=250, bins=15, legend=False)
+            h = Histogram(Deffs[particle_chemistry], width=300, height=250)
+            # The histogram x-axis is calibrated to remain at a
+            # constant scale for each given tmin/tmax combination--this
+            # gives a sense of scale for this particular histogram
+            # within the possible Deff values for all the chemistries
             h.x_range = Range1d(0,np.max(maxes))
-            # h.xaxis.major_label_orientation = "vertical"
             f = hplot(h,p)
             show(f)
-            # puke Deff lists while returning the much prettier avg_Deffs table
-            # print Deffs
             return avg_Deffs
