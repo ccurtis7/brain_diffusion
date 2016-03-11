@@ -9,6 +9,8 @@ into one data set.
 import numpy as np
 import pandas as pd
 import zipfile
+from ipywidgets import interact, interactive, Dropdown, widgets
+from IPython.display import clear_output, display, HTML
 from bokeh.charts import Histogram, output_notebook, show, defaults
 
 # Unzip the csv data and assign it to variables
@@ -145,12 +147,89 @@ def working_data(size_center,size_tick,zp_tick):
     p_all = p_all[p_all.Deff > 0]
     return p_all
 
-def plot_Deff(size_center,size_tick,zp_tick,bins_num):
+def plot_Deff(bins_num,PEG,Particle_Type,Surfactant,Size_Range,ZP_Range):
+    size_center=100
+    size_tick=10
+    zp_tick=5
     data = working_data(size_center,size_tick,zp_tick)
-    defaults.width = 1000
-    p = Histogram(data, values='Deff', color='Particle', bins=bins_num, title="Deff Distribution of Particles", legend='top_right')
-    output_notebook()
-    show(p)
+    data2 = data
+    sizes = set_size_range(size_center,size_tick)
+    zp = set_zp_range(zp_tick)
+    list_vars_Size_Range = list()
+    list_vars_ZP_Range = list()
+    for x in range(0,len(sizes)):
+        list_vars_Size_Range.insert(x,sizes['Size_Range'][x])
+    list_vars_Size_Range.insert(0,'All')
+    for x in range(0,len(zp)):
+        list_vars_ZP_Range.insert(x,zp['ZP_Range'][x])
+    list_vars_ZP_Range.insert(0,'All')
+    list_vars_Surfactant = ['All','UP','P80','F68','5CHA','2CHA','0.5CHA']
+    list_vars_Particle_Type = ['All','58k','45k','15k']
+    if PEG == 'No':
+        data2 = data[data.PEG == 'No']
+    if PEG == 'Yes':
+        data2 = data[data.PEG == 'Yes']
+    data = data2
+    data2 = pd.DataFrame()
+    for x in range(0,len(list_vars_Surfactant)):
+        for y in range(0, len(Surfactant)):
+            if Surfactant[y] == list_vars_Surfactant[x]:
+                data2 = data2.append(data[data.Surfactant == Surfactant[y]])
+    if Surfactant[0] == 'All':
+        data2 = data
+    data = data2
+    data2 = pd.DataFrame()
+    for x in range(0,len(list_vars_Particle_Type)):
+        for y in range(0, len(Particle_Type)):
+            if Particle_Type[y] == list_vars_Particle_Type[x]:
+                data2 = data2.append(data[data.Particle_Type == Particle_Type[y]])
+    if Particle_Type[0] == 'All':
+        data2 = data
+    data = data2
+    data2 = pd.DataFrame()
+    for x in range(0,len(list_vars_Size_Range)):
+        for y in range(0, len(Size_Range)):
+            if Size_Range[y] == list_vars_Size_Range[x]:
+                data2 = data2.append(data[data.Size_Range == Size_Range[y]])
+    if Size_Range[0] == 'All':
+        data2 = data
+    data = data2
+    data2 = pd.DataFrame()
+    for x in range(0,len(list_vars_ZP_Range)):
+        for y in range(0, len(ZP_Range)):
+            if ZP_Range[y] == list_vars_ZP_Range[x]:
+                data2 = data2.append(data[data.ZP_Range == ZP_Range[y]])
+    if ZP_Range[0] == 'All':
+        data2 = data
+    data = data2
+    if data.empty is True:
+        print ('No particles meet the selected parameters. Please broaden your filters.')
+    else:
+        defaults.width = 1000
+        p = Histogram(data, values='Deff', color='Particle', bins=bins_num, title="Deff Distribution of Particles", legend='top_right')
+        output_notebook()
+        show(p)
+
+def interact_plot_deff():
+    vars_PEG = ['All','Yes','No']
+    vars_Surfactant = widgets.SelectMultiple(description="Surfactant",options=['All','UP','P80','F68','5CHA','2CHA','0.5CHA'])
+    vars_Particle_Type = widgets.SelectMultiple(description="Particle_Type",options=['All','58k','45k','15k'])
+    size_center=100
+    size_tick=10
+    zp_tick=5
+    sizes = set_size_range(100,10)
+    zp = set_zp_range(5)
+    list_vars_Size_Range = list()
+    list_vars_ZP_Range = list()
+    for x in range(0,len(sizes)):
+        list_vars_Size_Range.insert(x,sizes['Size_Range'][x])
+    list_vars_Size_Range.insert(0,'All')
+    vars_Size_Range = widgets.SelectMultiple(description="Size_Range",options=list_vars_Size_Range)
+    for x in range(0,len(zp)):
+        list_vars_ZP_Range.insert(x,zp['ZP_Range'][x])
+    list_vars_ZP_Range.insert(0,'All')
+    vars_ZP_Range = widgets.SelectMultiple(description="ZP_Range",options=list_vars_ZP_Range)
+    interact(plot_Deff,bins_num=(1,20),PEG=vars_PEG,Particle_Type=vars_Particle_Type,Surfactant=vars_Surfactant,Size_Range=vars_Size_Range,ZP_Range=vars_ZP_Range)
 
 """
 def set_deff_bin():
