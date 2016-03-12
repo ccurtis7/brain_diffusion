@@ -77,12 +77,14 @@ def set_zp_range(tick):
         zp.loc[[x],['ZP_Range']] = '%i to %i' % (zp['Low'][x], zp['High'][x])
     return zp
 
-# function assigning size and zeta potential categories to each particle
-# property row that then merges Deff and PP to create a working data set
+
 def prop_data(size_center,size_tick,zp_tick):
+    """
+    This function assigns size and zeta potential categories to each particle
+    property row by calling on set_zp_range and set_size_range.
+    """
     prop['Size_Range'] = 0
     prop['ZP_Range'] = 0
-    prop['Color'] = 0
     size_range = set_size_range(size_center,size_tick)
     zp_range = set_zp_range(zp_tick)
     for x in range(0, len(prop)):
@@ -94,22 +96,16 @@ def prop_data(size_center,size_tick,zp_tick):
             if prop['Zeta_Potential'][x] >= zp_range['Low'][z] and prop['Zeta_Potential'][x] < zp_range['High'][z]:
                 prop.loc[[x],['ZP_Range']] = zp_range['ZP_Range'][z]
                 break
-    """
-    deffnew = set_bin_counts()
-    deff2 = deffnew.set_index('Particle')
-    prop2 = prop.set_index('Sample')
-    data = prop2.join(deff2)
-    return data
-    """
     prop2 = prop.set_index('Sample')
     return prop2
 
 def working_data(size_center,size_tick,zp_tick):
-    zf = zipfile.ZipFile('brain-diffusion_data.zip')
-    file_handle1 = zf.open('Effective_Diffusion_1s_Data.csv')
-    deff = pd.read_csv(file_handle1)
-    deff = deff.set_index('Particle')
-    deff = deff.transpose()
+    """
+    This function takes deff and converts it into new dataframes for each
+    particle with every particle deff matched with the particle type in the next
+    row. The particle dataframes are then appended together, and then the
+    particle properties are added for each row.
+    """
     p1 = pd.melt(deff, value_vars=['PLGA58k UP'])
     p2 = pd.melt(deff, value_vars=['PLGA58k P80'])
     p3 = pd.melt(deff, value_vars=['PLGA58k F68'])
@@ -148,6 +144,15 @@ def working_data(size_center,size_tick,zp_tick):
     return p_all
 
 def plot_Deff(bins_num,PEG,Particle_Type,Surfactant,Size_Range,ZP_Range):
+    """
+    This function plots the particles depending on the selected particle
+    properties input. It has been customized to allow interactive input from
+    the function below. The list of variables were created manually and would
+    have to be changed for a different data set.
+    """
+    # Here size_center, size_tick, and zp_tick are set because these values
+    # determine the Size_Range and ZP_Range categories. They must be manually
+    # changed here, as well as in interact_plot_deff below.
     size_center=100
     size_tick=10
     zp_tick=5
@@ -157,6 +162,8 @@ def plot_Deff(bins_num,PEG,Particle_Type,Surfactant,Size_Range,ZP_Range):
     zp = set_zp_range(zp_tick)
     list_vars_Size_Range = list()
     list_vars_ZP_Range = list()
+    # Here the lists for size range and zp range are taken from the dataframes
+    # created from the set size and zp range functions.
     for x in range(0,len(sizes)):
         list_vars_Size_Range.insert(x,sizes['Size_Range'][x])
     list_vars_Size_Range.insert(0,'All')
@@ -202,6 +209,8 @@ def plot_Deff(bins_num,PEG,Particle_Type,Surfactant,Size_Range,ZP_Range):
     if ZP_Range[0] == 'All':
         data2 = data
     data = data2
+    # An if statement is present to prevent the function from attempting to
+    # plot if no particles are selected to prevent encountering an error.
     if data.empty is True:
         print ('No particles meet the selected parameters. Please broaden your filters.')
     else:
@@ -211,6 +220,12 @@ def plot_Deff(bins_num,PEG,Particle_Type,Surfactant,Size_Range,ZP_Range):
         show(p)
 
 def interact_plot_deff():
+    """
+    This function is to interact with the plot_deff function. Several widgets
+    are made, allowing several variables to be toggled to change the plotted
+    bokeh output. The entire functionality of these functions can be done by
+    simply calling this function.
+    """
     vars_PEG = ['All','Yes','No']
     vars_Surfactant = widgets.SelectMultiple(description="Surfactant",options=['All','UP','P80','F68','5CHA','2CHA','0.5CHA'])
     vars_Particle_Type = widgets.SelectMultiple(description="Particle_Type",options=['All','58k','45k','15k'])
@@ -232,6 +247,13 @@ def interact_plot_deff():
     interact(plot_Deff,bins_num=(1,20),PEG=vars_PEG,Particle_Type=vars_Particle_Type,Surfactant=vars_Surfactant,Size_Range=vars_Size_Range,ZP_Range=vars_ZP_Range)
 
 """
+set_deff_bin and set_bin_counts were made to categorize the deff values. They
+are no longer needed since I figured out Bokeh.charts automatically sets the
+bins of the graph a little too late... They could potentially be of use if
+trying to plot them with Bokeh.plotting with more specified characteristics
+different than those of Bokeh Histograms.
+"""
+
 def set_deff_bin():
     deff['MaxDeff'] = deff[:].max(axis=1)
     high = max(deff['MaxDeff'])
@@ -267,4 +289,3 @@ def set_bin_counts():
     for x in range(0,len(deff_bin)):
         deffnew=deffnew.rename(columns = {'%i' % (x+1):deff_bin['Deff_Range'][x]})
     return deffnew
-"""
