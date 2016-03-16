@@ -133,8 +133,8 @@ def compute_hist_Deff(particle_chemistry, tmin, tmax):
     the list of Deffs for the given particle chemistry.
     """
     # Verify time range validity
-    if tmin < 0 or tmax > 20:
-        return 'Error: input time range between 0 and 20 sec'
+    if tmin < 0 or tmax > round(max(msd.index)):
+        return "Error: input time range between 0 and your data's tmax"
     else:
         if tmin == 0:
             print 'Divide by 0 error: tmin=0 changed to tmin=0.01'
@@ -207,8 +207,8 @@ def compute_plot_all_Deff(tmin, tmax, particle_chemistry):
     geometric mean Deff values for each particle chemistry
     """
     # Verify time range validity
-    if tmin < 0 or tmax > 20:
-        return 'Error: input time range between 0 and 20 sec'
+    if tmin < 0 or tmax > round(max(msd.index)):
+        return "Error: input time range between 0 and your data's tmax"
     else:
         if tmin == 0:
             print 'Divide by 0 error: tmin=0 changed to tmin=0.01'

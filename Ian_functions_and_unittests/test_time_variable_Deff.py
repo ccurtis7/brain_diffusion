@@ -1,5 +1,6 @@
 """Unit tests for time_variable_Deff.py"""
 
+import numpy as np
 import os
 import pandas as pd
 import sys
@@ -23,14 +24,55 @@ class TestDataCleaning(unittest.TestCase):
         vc = pd.Series(time_variable_Deff.columns2).value_counts()
         self.assertEqual(vc[vc > 1].index.tolist(), [])
 
-    def test_data_size(self):
-        # There is a possibility that test_image_file_output won't be
-        # adequate (if the data table is blank I believe
-        # make_scatter_plot() will still save a blank figure), so I
-        # want to also test if the data variable is as big as we expect.
-        trips = pu.get_trip_data()
-        rows = len(trips)
-        self.assertEqual(rows, 142846)
+    def test_msd_index_float(self):
+        # Part of the data cleaning involves changing the timepoint
+        # values, which will become the index of the msd dataframe,
+        # from strings into floats.  This enables the downstream
+        # timepoint cutoffs.  This test verifies that this change did
+        # indeed occur.
+        self.assertEqual(type(time_variable_Deff.msd.index[np.random.randint(
+            len(time_variable_Deff.msd))]), np.float64
+        )
+
+    def test_geo_means_append(self):
+        # A key part of the data cleaning is to compute and append
+        # geometric means for each timepoint within each chemistry.
+        # This test will make sure this append happened by simply
+        # checking whether the final column in msd contains the string
+        # 'geo', as it should if it was appended.
+        columntitle = time_variable_Deff.msd.columns[len(
+            time_variable_Deff.msd.columns)-1]
+        self.assertTrue('geo' in columntitle)
+
+
+class TestComputeHistDeff(unittest.TestCase):
+
+
+    def test_hist_html_file_output(self):
+        # This test will check if compute_hist_Deff() actually got to
+        # the point of saving the figure to the directory, assuming
+        # that everything must have functioned correctly up to that
+        # point.
+        # First, have to make sure the image file is freshly created.
+        if os.path.exists('Deffs_hist.html'):
+            os.unlink('Deffs_hist.html')
+        time_variable_Deff.compute_hist_Deff('PLGA15k 0.5CHA', 2, 7)
+        self.assertTrue(os.path.exists('Deffs_hist.html'))
+
+
+class TestComputePlotAllDeff(unittest.TestCase):
+
+
+    def test_hist_html_file_output(self):
+        # This test will check if compute_plot_all_Deff() actually got
+        # to the point of saving the figure to the directory, assuming
+        # that everything must have functioned correctly up to that
+        # point.
+        # First, have to make sure the image file is freshly created.
+        if os.path.exists('Deffs_hist_and_line_plot.html'):
+            os.unlink('Deffs_hist_and_line_plot.html')
+        time_variable_Deff.compute_hist_Deff(2, 7, 'PLGA15k 0.5CHA')
+        self.assertTrue(os.path.exists('Deffs_hist_and_line_plot.html'))
 
 
 if __name__ == '__main__':
