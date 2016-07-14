@@ -185,7 +185,7 @@ def shift_trajectory(xydata):
     return (numerical, justright)
 
 
-def shift_trajectory3D(xydata):
+def shift_trajectory3D(xyzdata):
     """
     Adjusts the coordinate system of x-y-z trajectory data such that if the data
     were plotted, the center of the plot would be (0,0,0).
