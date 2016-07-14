@@ -185,6 +185,75 @@ def shift_trajectory(xydata):
     return (numerical, justright)
 
 
+def shift_trajectory3D(xydata):
+    """
+    Adjusts the coordinate system of x-y-z trajectory data such that if the data
+    were plotted, the center of the plot would be (0,0,0).
+
+    Inputs:
+    xyzdata: a numpy array of 3 columns: frame, x-coordinate and y-coordinate.
+    """
+
+    length = xyzdata.shape[0]
+    width = xyzdata.shape[1]
+
+    # Define unit test variables
+    numerical = True
+    justright = True
+
+    # checks for data that's not float64 format
+    for num in range(0, width):
+
+        for yes in range(0, length):
+
+            if np.dtype(xyzdata[yes, num]) == np.dtype('float64'):
+                numerical = True
+            else:
+                numerical = False
+                break
+
+    if not numerical:
+
+        print("Array contains data that isn't of type float64.")
+
+    else:
+
+        # Checks if array is correct format (3 columns)
+        if width == 3:
+
+            x_mean = (np.min(xyzdata[:, 0]) + np.max(xyzdata[:, 0]))/2
+            y_mean = (np.min(xyzdata[:, 1]) + np.max(xyzdata[:, 1]))/2
+            z_mean = (np.min(xyzdata[:, 2]) + np.max(xyzdata[:, 2]))/2
+
+            xyzdata[:, 0] = xyzdata[:, 0] - x_mean
+            xyzdata[:, 1] = xyzdata[:, 1] - y_mean
+            xyzdata[:, 2] = xyzdata[:, 2] - z_mean
+
+            print("Trajectory successfully shifted.")
+
+        else:
+
+            if width > 3:
+
+                x_mean = (np.min(xyzdata[:, 0]) + np.max(xyzdata[:, 0]))/2
+                y_mean = (np.min(xyzdata[:, 1]) + np.max(xyzdata[:, 1]))/2
+                z_mean = (np.min(xyzdata[:, 2]) + np.max(xyzdata[:, 2]))/2
+
+                xydata[:, 1] = xyzdata[:, 1] - x_mean
+                xydata[:, 2] = xyzdata[:, 2] - y_mean
+
+                justright = False
+
+                print("Array has more than three columns. May not yield correct results")
+
+            else:
+
+                justright = False
+                print("Array doesn't have enough columns")
+
+    return (numerical, justright)
+
+
 def plot_trajectory(xydata, charttitle):
     """
     Plots a single 3-column numpy array of trajectory data (frames in column 1,
