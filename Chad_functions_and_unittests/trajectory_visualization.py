@@ -4,6 +4,7 @@ import numpy as np
 import os
 import csv
 from bokeh.client import push_session
+import random
 
 
 def download_trajectory_data(file):
