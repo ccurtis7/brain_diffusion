@@ -464,3 +464,356 @@ def animated_plot(xydata):
 
     # run forever
     session.loop_until_closed()
+
+
+def plot_trajectories3D(traj, n1, n2, n3, dec, filename):
+    """
+    This function creates a multiple 3D plots from trajectory data.  This
+    dataset must include a column of particle numbers as well as the x, y, and
+    z coordinates of of each particle at each frame. Output will be saved as a
+    .png file of the desired name.
+    Inputs:
+    traj: array of trajectory data e.g. particle #, frames, x, y, z, Deff, MSD
+    n1: particle# column
+    n2: x data
+    n3: z data (with y data, of course, in between x and z.  This just defines a range)
+    dec: how many decimals you would like to be displayed in the graph.
+    filename: what you want to name the file.  Must be in ''.
+    Can also use plt.show() afterwards to preview your data, even if it skews the title and legend a bit.
+    """
+
+    # Creates an array 'particles' that contains the particle number at each frame.
+    particles = traj[:, n1]
+    position = traj[:, n2:n3+1]
+    total = int(max(particles))
+    total1 = total + 1
+    path = dict()
+
+    # Creates an array for each trajectory containing all xyz data
+    for num in range(1, total1):
+
+        hold = np.where(particles == num)
+        itindex = hold[0]
+        min1 = min(itindex)
+        max1 = max(itindex)
+        path[num] = (position[min1:max1, :])
+
+    # Determines arrangement of subplots
+    rows = np.sqrt(total)
+    if (rows % 1 == 0):
+        rows = int(rows)
+    else:
+        rows = int(rows) + 1
+
+    # Create figure
+    fig = plt.figure(figsize=(24, 20), dpi=80)
+    ax = dict()
+
+    # Plot trajectories
+    for num in range(1, total1):
+
+        number = 100*rows + 10*rows + num
+        ax[num] = fig.add_subplot(number, projection='3d')
+        ax[num].set_title('Particle {}'.format(num), x=0.5, y=1.08)
+        ax[num].plot(path[num][:, 0], path[num][:, 1], path[num][:, 2])
+        ax[num].locator_params(nbins=5)
+        ax[num].title.set_fontsize(30)
+
+        ax[num].tick_params(direction='out', pad=13)
+
+        ax[num].xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
+        ax[num].yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
+        ax[num].zaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
+
+    # Save figures
+    plt.savefig('{}.png'.format(filename), bbox_inches='tight')
+
+
+def plot_3Doverlay(traj, n1, n2, n3, dec, filename):
+    """
+    This function creates a single 3D plot from trajectory data.  This dataset
+    must include a column of particle numbers as well as the x, y, and z
+    coordinates of of each particle at each frame. Output will be saved as a
+    .png file of the desired name.
+    Inputs:
+    traj: array of trajectory data e.g. particle #, frames, x, y, z, Deff, MSD
+    n1: particle# column
+    n2: x data
+    n3: z data (with y data, of course, in between x and z.  This just defines
+    a range)
+    dec: how many decimals you would like to be displayed in the graph.
+    filename: what you want to name the file.  Must be in ''.
+    Can also use plt.show() afterwards to preview your data, even if it skews the title and legend a bit.
+    """
+
+    # Creates an array 'particles' that contains the particle number at each frame.
+    particles = traj[:, n1]
+    position = traj[:, n2:n3+1]
+    total = int(max(particles))
+    total1 = total + 1
+    path = dict()
+
+    # Creates an array for each trajectory containing all xyz data
+    for num in range(1, total1):
+
+        hold = np.where(particles == num)
+        itindex = hold[0]
+        min1 = min(itindex)
+        max1 = max(itindex)
+        path[num] = (position[min1:max1, :])
+
+    # Creates figure
+    fig = plt.figure(figsize=(24, 18), dpi=80)
+    ax = fig.add_subplot(111, projection='3d')
+    ax.set_title('Particle Trajectories', x=0.5, y=1.15)
+
+    # Plots individual trajectories
+    for num in range(1, total1):
+
+        ax.plot(path[num][:, 0], path[num][:, 1], path[num][:, 2], label='Particle {}'.format(num))
+
+    axbox = ax.get_position()
+    ax.legend(loc=(0.86, 0.90), prop={'size': 20})
+    ax.locator_params(nbins=4)
+    ax.view_init(elev=38, azim=72)
+
+    # A few adjustments to prettify the graph
+    for item in ([ax.xaxis.label, ax.yaxis.label, ax.zaxis.label] +
+                 ax.get_xticklabels() + ax.get_yticklabels() + ax.get_zticklabels()):
+        item.set_fontsize(13)
+
+    ax.title.set_fontsize(35)
+    ax.tick_params(direction='out', pad=16)
+    plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
+    plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
+    plt.gca().zaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
+
+    # Save your figure
+    plt.savefig('{}.png'.format(filename), bbox_inches='tight')
+
+
+def plot_MSD(traj, n1, n2, n3, dec, filename):
+    """
+    Plots the MSDs from a trajectory dataset.
+
+    n1: particle numbers
+    n2: time
+    n3: MSDs
+    """
+
+    # Creates an array 'particles' that contains the particle number at each frame.
+    particles = three[:, n1]
+    total = int(max(particles))
+    total1 = total + 1
+    rawtime = three[:, n2]
+    rawMSD = three[:, n3]
+    MSD = dict()
+    time = dict()
+
+    # Creates an array for each trajectory containing all xyz data
+    for num in range(1, total1):
+
+        hold = np.where(particles == num)
+        itindex = hold[0]
+        min1 = min(itindex)
+        max1 = max(itindex)
+        MSD[num] = (rawMSD[min1:max1])
+        time[num] = (rawtime[min1:max1])
+
+    # Creates figure
+    fig = plt.figure(figsize=(24, 18), dpi=80)
+    ax = fig.add_subplot(111)
+    ax.set_title('Particle Trajectories', x=0.5, y=1.15)
+
+    # Plots individual trajectories
+    for num in range(1, total1):
+
+        ax.plot(time[num][:], MSD[num][:], label='Particle {}'.format(num))
+
+    axbox = ax.get_position()
+    # ax.legend(loc =(0.86, 0.90), prop={'size':20})
+    # ax.locator_params(nbins=4)
+
+    # A few adjustments to prettify the graph
+    for item in ([ax.xaxis.label, ax.yaxis.label] +
+                 ax.get_xticklabels() + ax.get_yticklabels()):
+        item.set_fontsize(16)
+
+    ax.title.set_fontsize(35)
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel('MSD (um2)')
+    ax.tick_params(direction='out', pad=16)
+    plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
+    plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
+
+    # Save your figure
+    plt.savefig('{}.png'.format(filename), bbox_inches='tight')
+
+
+def plot_MeanMSD(traj, n1, n2, n3, dec, filename):
+    """
+    Plots the MSDs from a trajectory dataset.
+
+    n1: particle numbers
+    n2: time
+    n3: MSDs
+    """
+
+    # Creates an array 'particles' that contains the particle number at each frame.
+    particles = three[:, n1]
+    total = int(max(particles))
+    total1 = total + 1
+    rawtime = three[:, n2]
+    rawMSD = three[:, n3]
+    MSD = dict()
+    time = dict()
+
+    # Creates an array for each trajectory containing all xyz data
+    for num in range(1, total1):
+
+        hold = np.where(particles == num)
+        itindex = hold[0]
+        min1 = min(itindex)
+        max1 = max(itindex)
+        MSD[num] = (rawMSD[min1:max1])
+        time[num] = (rawtime[min1:max1])
+
+    MMSD = MSD[1]
+    for num in range(2, total1):
+        MMSD = MMSD + MSD[num]
+    MMSD = MMSD/total1
+
+    # Creates figure
+    fig = plt.figure(figsize=(24, 18), dpi=80)
+    ax = fig.add_subplot(111)
+    ax.set_title('Particle Trajectories', x=0.5, y=1.15)
+
+    ax.plot(time[1][:], MMSD[:])
+
+    # A few adjustments to prettify the graph
+    for item in ([ax.xaxis.label, ax.yaxis.label] +
+                 ax.get_xticklabels() + ax.get_yticklabels()):
+        item.set_fontsize(16)
+
+    ax.title.set_fontsize(35)
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel('MSD (um2)')
+    ax.tick_params(direction='out', pad=16)
+    plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
+    plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
+
+    # Save your figure
+    plt.savefig('{}.png'.format(filename), bbox_inches='tight')
+
+
+def randtraj(b, s, f, p):
+    """
+    Builds a single random trajectory.
+
+    b: base magnitude of single step
+    s: variation in step size
+    f: number of frames or steps to Takes
+    p: particle number (should be 1 for now)
+
+    Output:
+    0 particle number
+    1 time or frames
+    2 magnitude
+    3 angle 1
+    4 angle 2
+    5 x coordinate
+    6 y coordinate
+    7 z coordinate
+    8 centered x coordinate
+    9 centered y coordinate
+    10 centered z coordinate
+    11 MSD
+    12 2D xy MSD
+    13 2D xz MSD
+    14 2D yz MSD
+    15 Diffusion Coefficient (Deff)
+    16 2D xy Deff
+    17 2D xz Deff
+    18 2D yz Deff
+    """
+
+    base = b
+    step = s
+    pi = 3.14159
+    frames = f
+    parts = 40
+
+    ttraject = np.zeros((frames, 20))
+
+    for num in range(1, frames):
+
+        # Create particle number
+        ttraject[num, 0] = p
+        ttraject[num-1, 0] = p
+        # Create frame
+        ttraject[num, 1] = 1 + ttraject[num-1, 1]
+        # Create magnitude vector
+        ttraject[num, 2] = base + step*random.random()
+        # Create Angle Vectors
+        ttraject[num, 3] = 2 * pi * random.random()
+        ttraject[num, 4] = pi * random.random()
+        # Build trajectories
+        ttraject[num, 5] = ttraject[num-1, 5] + ttraject[num, 2]*np.sin(ttraject[num, 4])*np.cos(ttraject[num, 3])
+        ttraject[num, 6] = ttraject[num-1, 6] + ttraject[num, 2]*np.sin(ttraject[num, 4])*np.sin(ttraject[num, 3])
+        ttraject[num, 7] = ttraject[num-1, 7] + ttraject[num, 2]*np.cos(ttraject[num, 4])
+
+    particle = ttraject[:, 0]
+    time = ttraject[:, 1]
+    x = ttraject[:, 5]
+    y = ttraject[:, 6]
+    z = ttraject[:, 7]
+
+    ttraject[:, 8] = x - ((max(x)+min(x))/2)
+    cx = ttraject[:, 8]
+    ttraject[:, 9] = y - ((max(y)+min(y))/2)
+    cy = ttraject[:, 9]
+    ttraject[:, 10] = z - ((max(z)+min(z))/2)
+    cz = ttraject[:, 10]
+
+    # Calculate MSDs and Deffs
+    for num in range(1, frames):
+
+        ttraject[num, 11] = np.sqrt((ttraject[num, 8]-ttraject[0, 8])**2 + (ttraject[num, 9]-ttraject[0, 9])**2 +
+                                    (ttraject[num, 10]-ttraject[0, 10])**2)
+        ttraject[num, 12] = np.sqrt((ttraject[num, 8]-ttraject[0, 8])**2 + (ttraject[num, 9]-ttraject[0, 9])**2)
+        ttraject[num, 13] = np.sqrt((ttraject[num, 8]-ttraject[0, 8])**2 + (ttraject[num, 10]-ttraject[0, 10])**2)
+        ttraject[num, 14] = np.sqrt((ttraject[num, 10]-ttraject[0, 10])**2 + (ttraject[num, 9]-ttraject[0, 9])**2)
+
+        ttraject[num, 15] = ttraject[num, 11]/(6*ttraject[num, 1])
+        ttraject[num, 16] = ttraject[num, 12]/(4*ttraject[num, 1])
+        ttraject[num, 17] = ttraject[num, 13]/(4*ttraject[num, 1])
+        ttraject[num, 18] = ttraject[num, 14]/(4*ttraject[num, 1])
+
+    MSD = ttraject[:, 11]
+    MSDxy = ttraject[:, 12]
+    MSDxz = ttraject[:, 13]
+    MSDyz = ttraject[:, 14]
+
+    Deff = ttraject[:, 15]
+    Deffxy = ttraject[:, 16]
+    Deffxz = ttraject[:, 17]
+    Deffyz = ttraject[:, 18]
+
+    return ttraject
+
+
+def multrandtraj(b, s, f, p):
+    """
+    Builds an array of multiple trajectories appended to each other. Number of
+    trajectories is determined by p.
+    """
+
+    parts = p
+    one = randtraj(b, s, f, 1)
+    counter = 1
+
+    while counter < p + 1:
+        counter = counter + 1
+        one = np.append(one, randtraj(b, s, f, counter), axis=0)
+
+    return one
