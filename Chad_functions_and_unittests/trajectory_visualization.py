@@ -596,13 +596,13 @@ def plot_3Doverlay(traj, n1, n2, n3, dec, filename):
     plt.savefig('{}.png'.format(filename), bbox_inches='tight')
 
 
-def plot_MSD(traj, n1, n2, n3, dec, filename):
+def plot_MSDorDeff(traj, n1, n2, n3, dec, datatype, filename):
     """
     Plots the MSDs from a trajectory dataset.
 
     n1: particle numbers
     n2: time
-    n3: MSDs
+    n3: MSDs or Deffs
     """
 
     # Creates an array 'particles' that contains the particle number at each frame.
@@ -645,7 +645,7 @@ def plot_MSD(traj, n1, n2, n3, dec, filename):
 
     ax.title.set_fontsize(35)
     ax.set_xlabel('Time (s)')
-    ax.set_ylabel('MSD (um2)')
+    ax.set_ylabel(datatype)
     ax.tick_params(direction='out', pad=16)
     plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
     plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
@@ -654,13 +654,13 @@ def plot_MSD(traj, n1, n2, n3, dec, filename):
     plt.savefig('{}.png'.format(filename), bbox_inches='tight')
 
 
-def plot_MeanMSD(traj, n1, n2, n3, dec, filename):
+def plot_MeanMSDorDeff(traj, n1, n2, n3, dec, datatype, filename):
     """
     Plots the MSDs from a trajectory dataset.
 
     n1: particle numbers
     n2: time
-    n3: MSDs
+    n3: MSDs or Deffs
     """
 
     # Creates an array 'particles' that contains the particle number at each frame.
@@ -701,7 +701,7 @@ def plot_MeanMSD(traj, n1, n2, n3, dec, filename):
 
     ax.title.set_fontsize(35)
     ax.set_xlabel('Time (s)')
-    ax.set_ylabel('MSD (um2)')
+    ax.set_ylabel(datatype)
     ax.tick_params(direction='out', pad=16)
     plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
     plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
