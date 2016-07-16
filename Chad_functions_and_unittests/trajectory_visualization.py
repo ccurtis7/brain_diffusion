@@ -606,11 +606,11 @@ def plot_MSD(traj, n1, n2, n3, dec, filename):
     """
 
     # Creates an array 'particles' that contains the particle number at each frame.
-    particles = three[:, n1]
+    particles = traj[:, n1]
     total = int(max(particles))
     total1 = total + 1
-    rawtime = three[:, n2]
-    rawMSD = three[:, n3]
+    rawtime = traj[:, n2]
+    rawMSD = traj[:, n3]
     MSD = dict()
     time = dict()
 
@@ -664,11 +664,11 @@ def plot_MeanMSD(traj, n1, n2, n3, dec, filename):
     """
 
     # Creates an array 'particles' that contains the particle number at each frame.
-    particles = three[:, n1]
+    particles = traj[:, n1]
     total = int(max(particles))
     total1 = total + 1
-    rawtime = three[:, n2]
-    rawMSD = three[:, n3]
+    rawtime = traj[:, n2]
+    rawMSD = traj[:, n3]
     MSD = dict()
     time = dict()
 
