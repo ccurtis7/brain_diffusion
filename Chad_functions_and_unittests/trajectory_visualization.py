@@ -627,7 +627,7 @@ def plot_MSDorDeff(traj, n1, n2, n3, dec, datatype, filename):
     # Creates figure
     fig = plt.figure(figsize=(24, 18), dpi=80)
     ax = fig.add_subplot(111)
-    ax.set_title('Particle Trajectories', x=0.5, y=1.15)
+    # ax.set_title('Particle Trajectories', x=0.5, y=1.15)
 
     # Plots individual trajectories
     for num in range(1, total1):
@@ -690,7 +690,7 @@ def plot_MeanMSDorDeff(traj, n1, n2, n3, dec, datatype, filename):
     # Creates figure
     fig = plt.figure(figsize=(24, 18), dpi=80)
     ax = fig.add_subplot(111)
-    ax.set_title('Particle Trajectories', x=0.5, y=1.15)
+    # ax.set_title('Particle Trajectories', x=0.5, y=1.15)
 
     ax.plot(time[1][:], MMSD[:])
 
@@ -743,9 +743,8 @@ def randtraj(b, s, f, p):
 
     base = b
     step = s
-    pi = 3.14159
+    pi = 3.14159265359
     frames = f
-    parts = 40
 
     ttraject = np.zeros((frames, 20))
 
@@ -762,7 +761,7 @@ def randtraj(b, s, f, p):
         ttraject[num, 3] = 2 * pi * random.random()
         ttraject[num, 4] = pi * random.random()
         # Build trajectories
-        ttraject[num, 5] = ttraject[num-1, 5] + ttraject[num, 2]*np.sin(ttraject[num, 4])*np.cos(ttraject[num, 3])
+        ttraject[num, 5] = ttraject[num-1, 5] + ttraject[num, 2]*np.cos(ttraject[num, 4])*np.sin(ttraject[num, 3])
         ttraject[num, 6] = ttraject[num-1, 6] + ttraject[num, 2]*np.sin(ttraject[num, 4])*np.sin(ttraject[num, 3])
         ttraject[num, 7] = ttraject[num-1, 7] + ttraject[num, 2]*np.cos(ttraject[num, 4])
 
