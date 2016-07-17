@@ -602,7 +602,7 @@ def plot_MSDorDeff(traj, n1, n2, n3, dec, datatype, filename):
 
     n1: particle numbers
     n2: time
-    n3: MSDs or Deffs
+    n3: MSDs or Deffs (34 or 35 for my datasets)
     """
 
     # Creates an array 'particles' that contains the particle number at each frame.
@@ -635,7 +635,7 @@ def plot_MSDorDeff(traj, n1, n2, n3, dec, datatype, filename):
         ax.plot(time[num][:], MSD[num][:], label='Particle {}'.format(num))
 
     axbox = ax.get_position()
-    # ax.legend(loc =(0.86, 0.90), prop={'size':20})
+    ax.legend(loc=(0.86, 0.90), prop={'size': 20})
     # ax.locator_params(nbins=4)
 
     # A few adjustments to prettify the graph
