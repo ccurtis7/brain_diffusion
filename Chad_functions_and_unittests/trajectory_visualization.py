@@ -533,7 +533,7 @@ def plot_trajectories3D(traj, n1, n2, n3, dec, filename):
     plt.savefig('{}.png'.format(filename), bbox_inches='tight')
 
 
-def plot_3Doverlay(traj, n1, n2, n3, dec, filename):
+def plot_3Doverlay(traj, n1, n2, dec, filename):
     """
     This function creates a single 3D plot from trajectory data.  This dataset
     must include a column of particle numbers as well as the x, y, and z
@@ -542,8 +542,7 @@ def plot_3Doverlay(traj, n1, n2, n3, dec, filename):
     Inputs:
     traj: array of trajectory data e.g. particle #, frames, x, y, z, Deff, MSD
     n1: particle# column
-    n2: x data
-    n3: z data (with y data, of course, in between x and z.  This just defines
+    n2: xyz data start (so x data column, 29 for a normal dataset)
     a range)
     dec: how many decimals you would like to be displayed in the graph.
     filename: what you want to name the file.  Must be in ''.
@@ -552,7 +551,7 @@ def plot_3Doverlay(traj, n1, n2, n3, dec, filename):
 
     # Creates an array 'particles' that contains the particle number at each frame.
     particles = traj[:, n1]
-    position = traj[:, n2:n3+1]
+    position = traj[:, n2:n2+4]
     total = int(max(particles))
     total1 = total + 1
     path = dict()
