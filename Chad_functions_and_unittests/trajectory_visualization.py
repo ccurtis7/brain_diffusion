@@ -985,7 +985,17 @@ def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec, datatype, filename):
 def plot_MSDorDeffLR(traj, n1, n2, n3, dec, datatype, filename):
     """
     Plots the MSDs from a trajectory dataset. Also performs linear regression
-    to find average MSD.
+    to find average MSD.  This is normally used for data from my Excel
+    spreadsheets, and not for random trajectories, as random trajectories can
+    be plotted using an average function rather than linear regression.  This
+    also shouldn't actually be used for diffusion data, as this would be a poor
+    linear regression model for that set.  I will make another function
+    that will calculate Deff from that.
+
+    It must also be noted that this function will not work with datasets that
+    have trajectories beginning at times other than t=0.  This, for now, must
+    be manually adjusted in the spreadsheet.  I will ensure that my spreadsheets
+    are made this way before using the data.
 
     n1: particle numbers
     n2: time
@@ -1052,6 +1062,96 @@ def plot_MSDorDeffLR(traj, n1, n2, n3, dec, datatype, filename):
     ax.set_xlabel('Time (s)')
     ax.set_ylabel(datatype)
     ax.tick_params(direction='out', pad=16)
+    plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
+    plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
+
+    # Save your figure
+    plt.savefig('{}.png'.format(filename), bbox_inches='tight')
+
+
+def LRfor3D2D(traj, n1, n2, n3, n4, n5, n6, dec, datatype, filename):
+    """
+    n1: particle numbers
+    n2: time
+    n3: 3DMSDs
+    n4: 2D xy MSDs
+    n5: 2D xz MSDs
+    n6: 2D yz MSDs
+    """
+
+    # Insert to perform linear regression
+    small = 10**-10
+
+    def func(x, a, b, c, d, g):
+        return a*x + b*x**0.5 + c*x**2 + d*x**3 + g*np.log(x+small)
+
+    # Linear regression for 3D MSDs
+    xdata = traj[:, n2]
+    ydata = traj[:, n3]
+    x0 = [0.1, 0.1, 0.1, 0.1, 0.1]
+    params, other = opt.curve_fit(func, xdata, ydata, x0)
+
+    time1 = np.linspace(min(xdata), max(xdata), num=100)
+    MSD1 = np.zeros(np.shape(time1)[0])
+
+    for num in range(0, np.shape(time1)[0]):
+        MSD1[num] = params[0]*time1[num] + params[1]*time1[num]**0.5 + params[2]*time1[num]**2 + params[3]*time1[num]**3 + params[4]*np.log(time1[num] + small)
+
+    # Linear regression for 2D xy MSDs
+    y1data = traj[:, n4]
+    x1 = [0.1, 0.1, 0.1, 0.1, 0.1]
+    params1, other1 = opt.curve_fit(func, xdata, y1data, x1)
+
+    MSDxy = np.zeros(np.shape(time1)[0])
+
+    for num in range(0, np.shape(time1)[0]):
+        MSDxy[num] = params1[0]*time1[num] + params1[1]*time1[num]**0.5 + params1[2]*time1[num]**2 + params1[3]*time1[num]**3 + params1[4]*np.log(time1[num] + small)
+
+    # Linear regression for 2D xz MSDs
+    y2data = traj[:, n5]
+    x2 = [0.1, 0.1, 0.1, 0.1, 0.1]
+    params2, other2 = opt.curve_fit(func, xdata, y2data, x2)
+
+    MSDxz = np.zeros(np.shape(time1)[0])
+
+    for num in range(0, np.shape(time1)[0]):
+        MSDxz[num] = params2[0]*time1[num] + params2[1]*time1[num]**0.5 + params2[2]*time1[num]**2 + params2[3]*time1[num]**3 + params2[4]*np.log(time1[num] + small)
+
+    # Linear regression for 2D yz MSDs
+    y3data = traj[:, n5]
+    x3 = [0.1, 0.1, 0.1, 0.1, 0.1]
+    params3, other3 = opt.curve_fit(func, xdata, y3data, x3)
+
+    MSDyz = np.zeros(np.shape(time1)[0])
+
+    for num in range(0, np.shape(time1)[0]):
+        MSDyz[num] = params3[0]*time1[num] + params3[1]*time1[num]**0.5 + params3[2]*time1[num]**2 + params3[3]*time1[num]**3 + params3[4]*np.log(time1[num] + small)
+
+    Deff = np.divide(MSD1, 6*time1)
+    Dxy = np.divide(MSDxy, 4*time1)
+    Dxz = np.divide(MSDxz, 4*time1)
+    Dyz = np.divide(MSDyz, 4*time1)
+
+    # Creates figure
+    fig = plt.figure(figsize=(24, 18), dpi=80)
+    ax = fig.add_subplot(111)
+    # ax.set_title('Particle Trajectories', x=0.5, y=1.15)
+
+    ax.plot(time1, MSD1, label='3D')
+    ax.plot(time1, MSDxy, label='2D xy')
+    ax.plot(time1, MSDxz, label='2D xz')
+    ax.plot(time1, MSDyz, label='2D yz')
+
+    # A few adjustments to prettify the graph
+    for item in ([ax.xaxis.label, ax.yaxis.label] +
+                 ax.get_xticklabels() + ax.get_yticklabels()):
+        item.set_fontsize(16)
+
+    ax.title.set_fontsize(35)
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel(datatype)
+    ax.tick_params(direction='out', pad=16)
+    ax.legend(loc=(0.86, 0.86), prop={'size': 22})
     plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
     plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
 
