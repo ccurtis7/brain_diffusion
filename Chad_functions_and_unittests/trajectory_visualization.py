@@ -8,6 +8,7 @@ import random
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import scipy.optimize as opt
 
 
 def download_trajectory_data(file):
@@ -974,6 +975,84 @@ def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec, datatype, filename):
     ax.set_ylabel(datatype)
     ax.tick_params(direction='out', pad=16)
     ax.legend(loc=(0.86, 0.86), prop={'size': 22})
+    plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
+    plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
+
+    # Save your figure
+    plt.savefig('{}.png'.format(filename), bbox_inches='tight')
+
+
+def plot_MSDorDeffLR(traj, n1, n2, n3, dec, datatype, filename):
+    """
+    Plots the MSDs from a trajectory dataset. Also performs linear regression
+    to find average MSD.
+
+    n1: particle numbers
+    n2: time
+    n3: MSDs or Deffs (34 or 35 for my datasets)
+    """
+
+    # Creates an array 'particles' that contains the particle number at each frame.
+    particles = traj[:, n1]
+    total = int(max(particles))
+    total1 = total + 1
+    rawtime = traj[:, n2]
+    rawMSD = traj[:, n3]
+    MSD = dict()
+    time = dict()
+
+    # Creates an array for each trajectory containing all xyz data
+    for num in range(1, total1):
+
+        hold = np.where(particles == num)
+        itindex = hold[0]
+        min1 = min(itindex)
+        max1 = max(itindex)
+        MSD[num] = (rawMSD[min1:max1])
+        time[num] = (rawtime[min1:max1])
+
+    # Insert to perform linear regression
+    small = 10**-10
+
+    def func(x, a, b, c, d, g):
+        return a*x + b*x**0.5 + c*x**2 + d*x**3 + g*np.log(x+small)
+
+    xdata = traj[:, n2]
+    ydata = traj[:, n3]
+    x0 = [0.1, 0.1, 0.1, 0.1, 0.1]
+    params, other = opt.curve_fit(func, xdata, ydata, x0)
+
+    time1 = np.linspace(min(xdata), max(xdata), num=100)
+    MSD1 = np.zeros(np.shape(time1)[0])
+
+    for num in range(0, np.shape(time1)[0]):
+        MSD1[num] = params[0]*time1[num] + params[1]*time1[num]**0.5 + params[2]
+        *time1[num]**2 + params[3]*time1[num]**3 + params[4]*np.log(time1[num] + small)
+
+    # Creates figure
+    fig = plt.figure(figsize=(24, 18), dpi=80)
+    ax = fig.add_subplot(111)
+    # ax.set_title('Particle Trajectories', x=0.5, y=1.15)
+
+    # Plots individual trajectories
+    for num in range(1, total1):
+
+        ax.plot(time[num][:], MSD[num][:], label='Particle {}'.format(num))
+
+    ax.plot(time1, MSD1, label='Average')
+    axbox = ax.get_position()
+    ax.legend(loc=(0.86, 0.90), prop={'size': 20})
+    # ax.locator_params(nbins=4)
+
+    # A few adjustments to prettify the graph
+    for item in ([ax.xaxis.label, ax.yaxis.label] +
+                 ax.get_xticklabels() + ax.get_yticklabels()):
+        item.set_fontsize(16)
+
+    ax.title.set_fontsize(35)
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel(datatype)
+    ax.tick_params(direction='out', pad=16)
     plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
     plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
 
