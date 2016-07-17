@@ -917,6 +917,6 @@ def multrandtraj(b, s, f, p):
 
     while counter < p + 1:
         counter = counter + 1
-        one = np.append(one, randtraj(b, s, f, counter), axis=0)
+        one = np.append(one, randtraj2(b, s, f, counter), axis=0)
 
     return one
