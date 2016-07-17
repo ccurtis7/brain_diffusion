@@ -920,3 +920,63 @@ def multrandtraj(b, s, f, p):
         one = np.append(one, randtraj2(b, s, f, counter), axis=0)
 
     return one
+
+
+def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec, datatype, filename):
+    """
+    Plots the MSDs from a trajectory dataset.
+
+    n1: particle numbers
+    n2: time
+    n3: MSDs or Deffs
+    """
+
+    # Creates an array 'particles' that contains the particle number at each frame.
+    particles = traj[:, n1]
+    total = int(max(particles))
+    total1 = total + 1
+    rawtime = traj[:, n2]
+    raw2DMSDs = traj[:, n3:n3+4]
+    MSD = dict()
+    time = dict()
+
+    # Creates an array for each trajectory containing all xyz data
+    for num in range(1, total1):
+
+        hold = np.where(particles == num)
+        itindex = hold[0]
+        min1 = min(itindex)
+        max1 = max(itindex)
+        MSD[num] = (raw2DMSDs[min1:max1, :])
+        time[num] = (rawtime[min1:max1])
+
+    MMSD = MSD[1]
+    for num in range(2, total1):
+        MMSD = MMSD + MSD[num]
+    MMSD = MMSD/total1
+
+    # Creates figure
+    fig = plt.figure(figsize=(24, 18), dpi=80)
+    ax = fig.add_subplot(111)
+    # ax.set_title('Particle Trajectories', x=0.5, y=1.15)
+
+    ax.plot(time[1][:], MMSD[:, 0], label='3D')
+    ax.plot(time[1][:], MMSD[:, 1], label='2D xy')
+    ax.plot(time[1][:], MMSD[:, 2], label='2D xz')
+    ax.plot(time[1][:], MMSD[:, 3], label='2D yz')
+
+    # A few adjustments to prettify the graph
+    for item in ([ax.xaxis.label, ax.yaxis.label] +
+                 ax.get_xticklabels() + ax.get_yticklabels()):
+        item.set_fontsize(16)
+
+    ax.title.set_fontsize(35)
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel(datatype)
+    ax.tick_params(direction='out', pad=16)
+    ax.legend(loc=(0.86, 0.86), prop={'size': 22})
+    plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
+    plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
+
+    # Save your figure
+    plt.savefig('{}.png'.format(filename), bbox_inches='tight')
