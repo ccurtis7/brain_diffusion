@@ -1026,8 +1026,7 @@ def plot_MSDorDeffLR(traj, n1, n2, n3, dec, datatype, filename):
     MSD1 = np.zeros(np.shape(time1)[0])
 
     for num in range(0, np.shape(time1)[0]):
-        MSD1[num] = params[0]*time1[num] + params[1]*time1[num]**0.5 + params[2]*time1[num]**2 +
-        params[3]*time1[num]**3 + params[4]*np.log(time1[num] + small)
+        MSD1[num] = params[0]*time1[num] + params[1]*time1[num]**0.5 + params[2]*time1[num]**2 + params[3]*time1[num]**3 + params[4]*np.log(time1[num] + small)
 
     # Creates figure
     fig = plt.figure(figsize=(24, 18), dpi=80)
