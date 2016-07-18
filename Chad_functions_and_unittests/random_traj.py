@@ -323,9 +323,9 @@ def randsamp(b, s, f, p, samp):
         # ttraject[num, 3] = 2 * pi * random.random()
         # ttraject[num, 4] = pi * random.random()
         # Build trajectories
-        ttraject[num, 5] = ttraject[num-1, 5] + ttraject[num, 2] + xc
-        ttraject[num, 6] = ttraject[num-1, 6] + ttraject[num, 19] + yc
-        ttraject[num, 7] = ttraject[num-1, 7] + ttraject[num, 20] + zc
+        ttraject[num, 5] = ttraject[num-1, 5] + ttraject[num, 2]
+        ttraject[num, 6] = ttraject[num-1, 6] + ttraject[num, 19]
+        ttraject[num, 7] = ttraject[num-1, 7] + ttraject[num, 20]
 
     particle = ttraject[:, 0]
     time = ttraject[:, 1]
