@@ -61,9 +61,9 @@ def randaniso(b, s, f, p, xs, ys, zs):
         # Create frame
         ttraject[num, 1] = 1 + ttraject[num-1, 1]
         # Create magnitude vectors
-        ttraject[num, 2] = base*(random.random()-0.5)
-        ttraject[num, 19] = base*(random.random()-0.5)
-        ttraject[num, 20] = base*(random.random()-0.5)
+        ttraject[num, 2] = xs*base*(random.random()-0.5)
+        ttraject[num, 19] = ys*base*(random.random()-0.5)
+        ttraject[num, 20] = zs*base*(random.random()-0.5)
         # Create Angle Vectors
         # ttraject[num, 3] = 2 * pi * random.random()
         # ttraject[num, 4] = pi * random.random()
@@ -78,11 +78,11 @@ def randaniso(b, s, f, p, xs, ys, zs):
     y = ttraject[:, 6]
     z = ttraject[:, 7]
 
-    ttraject[:, 8] = xs*(x - ((max(x)+min(x))/2))
+    ttraject[:, 8] = (x - ((max(x)+min(x))/2))
     cx = ttraject[:, 8]
-    ttraject[:, 9] = ys*(y - ((max(y)+min(y))/2))
+    ttraject[:, 9] = (y - ((max(y)+min(y))/2))
     cy = ttraject[:, 9]
-    ttraject[:, 10] = zs*(z - ((max(z)+min(z))/2))
+    ttraject[:, 10] = (z - ((max(z)+min(z))/2))
     cz = ttraject[:, 10]
 
     # Calculate MSDs and Deffs
