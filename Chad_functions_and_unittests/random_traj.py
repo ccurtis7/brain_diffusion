@@ -8,7 +8,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import scipy.optimize as opt
 
 
-def randansio(b, s, f, p, xs, ys, zs):
+def randaniso(b, s, f, p, xs, ys, zs):
     """
     Builds a single random anisotropic trajectory without using spherical
     coordinates, as randtraj does. Anisotropic behavior is determined by the
