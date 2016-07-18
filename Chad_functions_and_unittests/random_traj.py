@@ -74,15 +74,15 @@ def randaniso(b, s, f, p, xs, ys, zs):
 
     particle = ttraject[:, 0]
     time = ttraject[:, 1]
-    x = ttraject[:, 5]*xs
-    y = ttraject[:, 6]*ys
-    z = ttraject[:, 7]*zs
+    x = ttraject[:, 5]
+    y = ttraject[:, 6]
+    z = ttraject[:, 7]
 
-    ttraject[:, 8] = x - ((max(x)+min(x))/2)
+    ttraject[:, 8] = xs*(x - ((max(x)+min(x))/2))
     cx = ttraject[:, 8]
-    ttraject[:, 9] = y - ((max(y)+min(y))/2)
+    ttraject[:, 9] = ys*(y - ((max(y)+min(y))/2))
     cy = ttraject[:, 9]
-    ttraject[:, 10] = z - ((max(z)+min(z))/2)
+    ttraject[:, 10] = zs*(z - ((max(z)+min(z))/2))
     cz = ttraject[:, 10]
 
     # Calculate MSDs and Deffs
