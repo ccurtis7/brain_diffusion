@@ -68,15 +68,15 @@ def randaniso(b, s, f, p, xs, ys, zs):
         # ttraject[num, 3] = 2 * pi * random.random()
         # ttraject[num, 4] = pi * random.random()
         # Build trajectories
-        ttraject[num, 5] = (ttraject[num-1, 5] + ttraject[num, 2])*xs
-        ttraject[num, 6] = (ttraject[num-1, 6] + ttraject[num, 19])*ys
-        ttraject[num, 7] = (ttraject[num-1, 7] + ttraject[num, 20])*zs
+        ttraject[num, 5] = (ttraject[num-1, 5] + ttraject[num, 2])
+        ttraject[num, 6] = (ttraject[num-1, 6] + ttraject[num, 19])
+        ttraject[num, 7] = (ttraject[num-1, 7] + ttraject[num, 20])
 
     particle = ttraject[:, 0]
     time = ttraject[:, 1]
-    x = ttraject[:, 5]
-    y = ttraject[:, 6]
-    z = ttraject[:, 7]
+    x = ttraject[:, 5]*xs
+    y = ttraject[:, 6]*ys
+    z = ttraject[:, 7]*zs
 
     ttraject[:, 8] = x - ((max(x)+min(x))/2)
     cx = ttraject[:, 8]
