@@ -980,6 +980,7 @@ def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec, datatype, filename):
 
     # Save your figure
     plt.savefig('{}.png'.format(filename), bbox_inches='tight')
+    return MMSD
 
 
 def plot_MSDorDeffLR(traj, n1, n2, n3, dec, datatype, filename):
