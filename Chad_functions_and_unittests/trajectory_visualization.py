@@ -1000,6 +1000,7 @@ def plot_MSDorDeffLR(traj, n1, n2, n3, dec, datatype, filename):
     n1: particle numbers
     n2: time
     n3: MSDs or Deffs (34 or 35 for my datasets)
+    datatype: must be either "MSD" or "Deff" in order to work
     """
 
     # Creates an array 'particles' that contains the particle number at each frame.
@@ -1112,10 +1113,16 @@ def LRfor3D2D(traj, n1, n2, n3, n4, n5, n6, dec, datatype, filename):
     ax = fig.add_subplot(111)
     # ax.set_title('Particle Trajectories', x=0.5, y=1.15)
 
-    ax.plot(time1, MSD1[0], label='3D')
-    ax.plot(time1, MSD1[1], label='2D xy')
-    ax.plot(time1, MSD1[2], label='2D xz')
-    ax.plot(time1, MSD1[3], label='2D yz')
+    if datatype == 'MSD':
+        ax.plot(time1, MSD1[0], label='3D MSD')
+        ax.plot(time1, MSD1[1], label='2D xy MSD')
+        ax.plot(time1, MSD1[2], label='2D xz MSD')
+        ax.plot(time1, MSD1[3], label='2D yz MSD')
+    else:
+        ax.plot(time1, Deff, label='3D D')
+        ax.plot(time1, Dxy, label='2D xy D')
+        ax.plot(time1, Dxz, label='2D xz D')
+        ax.plot(time1, Dyz, label='2D yz D')
 
     # A few adjustments to prettify the graph
     for item in ([ax.xaxis.label, ax.yaxis.label] +
