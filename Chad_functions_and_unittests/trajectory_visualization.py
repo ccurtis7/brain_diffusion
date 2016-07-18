@@ -1118,7 +1118,7 @@ def LRfor3D2D(traj, n1, n2, n3, n4, n5, n6, dec, datatype, filename):
         MSDxz[num] = params2[0]*time1[num] + params2[1]*time1[num]**0.5 + params2[2]*time1[num]**2 + params2[3]*time1[num]**3 + params2[4]*np.log(time1[num] + small)
 
     # Linear regression for 2D yz MSDs
-    y3data = traj[:, n5]
+    y3data = traj[:, n6]
     x3 = [0.1, 0.1, 0.1, 0.1, 0.1]
     params3, other3 = opt.curve_fit(func, xdata, y3data, x3)
 
