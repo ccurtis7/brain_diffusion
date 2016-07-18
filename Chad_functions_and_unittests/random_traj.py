@@ -12,7 +12,7 @@ def randaniso(b, s, f, p, xs, ys, zs):
     """
     Builds a single random anisotropic trajectory without using spherical
     coordinates, as randtraj does. Anisotropic behavior is determined by the
-    "stretching" coefficients xs ys zs.
+    "stretching" coefficients xs ys zs. Default is 1.
 
     b: base magnitude of single step
     s: variation in step size
@@ -112,10 +112,10 @@ def randaniso(b, s, f, p, xs, ys, zs):
     return ttraject
 
 
-def randconv(b, s, f, p, xs, ys, zs):
+def randconv(b, s, f, p, xc, yc, zc):
     """
     Builds a single random trajectory with a convection term. Magnitude of the
-    convection term is determined by xc, yc, and zc.
+    convection term is determined by xc, yc, and zc. Default is 0.
 
     b: base magnitude of single step
     s: variation in step size
