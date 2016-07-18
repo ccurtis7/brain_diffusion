@@ -1086,61 +1086,36 @@ def LRfor3D2D(traj, n1, n2, n3, n4, n5, n6, dec, datatype, filename):
         return a*x + b*x**0.5 + c*x**2 + d*x**3 + g*np.log(x+small)
 
     # Linear regression for 3D MSDs
-    xdata = traj[:, n2]
-    ydata = traj[:, n3]
+    xdata = trajectory[:, n2]
+    ydata = np.c_[np.c_[np.c_[trajectory[:, n3], trajectory[:, n4]], trajectory[:, n5]], trajectory[:, n6]]
     x0 = [0.1, 0.1, 0.1, 0.1, 0.1]
-    params, other = opt.curve_fit(func, xdata, ydata, x0)
+    params = dict()
+    MSD1 = dict()
+
+    for num in range(0, 4):
+        params[num], other = opt.curve_fit(func, xdata, ydata[:, num], x0)
 
     time1 = np.linspace(min(xdata), max(xdata), num=100)
-    MSD1 = np.zeros(np.shape(time1)[0])
 
-    for num in range(0, np.shape(time1)[0]):
-        MSD1[num] = params[0]*time1[num] + params[1]*time1[num]**0.5 + params[2]*time1[num]**2 + params[3]*time1[num]**3 + params[4]*np.log(time1[num] + small)
+    for b in range(0, 4):
+        MSD1[b] = np.zeros(np.shape(time1)[0])
+        for num in range(0, np.shape(time1)[0]):
+            MSD1[b][num] = params[b][0]*time1[num] + params[b][1]*time1[num]**0.5 + params[b][2]*time1[num]**2 + params[b][3]*time1[num]**3 + params[b][4]*np.log(time1[num] + small)
 
-    # Linear regression for 2D xy MSDs
-    y1data = traj[:, n4]
-    x1 = [0.1, 0.1, 0.1, 0.1, 0.1]
-    params1, other1 = opt.curve_fit(func, xdata, y1data, x1)
-
-    MSDxy = np.zeros(np.shape(time1)[0])
-
-    for num in range(0, np.shape(time1)[0]):
-        MSDxy[num] = params1[0]*time1[num] + params1[1]*time1[num]**0.5 + params1[2]*time1[num]**2 + params1[3]*time1[num]**3 + params1[4]*np.log(time1[num] + small)
-
-    # Linear regression for 2D xz MSDs
-    y2data = traj[:, n5]
-    x2 = [0.1, 0.1, 0.1, 0.1, 0.1]
-    params2, other2 = opt.curve_fit(func, xdata, y2data, x2)
-
-    MSDxz = np.zeros(np.shape(time1)[0])
-
-    for num in range(0, np.shape(time1)[0]):
-        MSDxz[num] = params2[0]*time1[num] + params2[1]*time1[num]**0.5 + params2[2]*time1[num]**2 + params2[3]*time1[num]**3 + params2[4]*np.log(time1[num] + small)
-
-    # Linear regression for 2D yz MSDs
-    y3data = traj[:, n6]
-    x3 = [0.1, 0.1, 0.1, 0.1, 0.1]
-    params3, other3 = opt.curve_fit(func, xdata, y3data, x3)
-
-    MSDyz = np.zeros(np.shape(time1)[0])
-
-    for num in range(0, np.shape(time1)[0]):
-        MSDyz[num] = params3[0]*time1[num] + params3[1]*time1[num]**0.5 + params3[2]*time1[num]**2 + params3[3]*time1[num]**3 + params3[4]*np.log(time1[num] + small)
-
-    Deff = np.divide(MSD1, 6*time1)
-    Dxy = np.divide(MSDxy, 4*time1)
-    Dxz = np.divide(MSDxz, 4*time1)
-    Dyz = np.divide(MSDyz, 4*time1)
+    Deff = np.divide(MSD1[0], 6*time1)
+    Dxy = np.divide(MSD1[1], 4*time1)
+    Dxz = np.divide(MSD1[2], 4*time1)
+    Dyz = np.divide(MSD1[3], 4*time1)
 
     # Creates figure
     fig = plt.figure(figsize=(24, 18), dpi=80)
     ax = fig.add_subplot(111)
     # ax.set_title('Particle Trajectories', x=0.5, y=1.15)
 
-    ax.plot(time1, MSD1, label='3D')
-    ax.plot(time1, MSDxy, label='2D xy')
-    ax.plot(time1, MSDxz, label='2D xz')
-    ax.plot(time1, MSDyz, label='2D yz')
+    ax.plot(time1, MSD1[0], label='3D')
+    ax.plot(time1, MSD1[1], label='2D xy')
+    ax.plot(time1, MSD1[2], label='2D xz')
+    ax.plot(time1, MSD1[3], label='2D yz')
 
     # A few adjustments to prettify the graph
     for item in ([ax.xaxis.label, ax.yaxis.label] +
