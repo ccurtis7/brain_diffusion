@@ -1086,8 +1086,8 @@ def LRfor3D2D(traj, n1, n2, n3, n4, n5, n6, dec, datatype, filename):
         return a*x + b*x**0.5 + c*x**2 + d*x**3 + g*np.log(x+small)
 
     # Linear regression for 3D MSDs
-    xdata = trajectory[:, n2]
-    ydata = np.c_[np.c_[np.c_[trajectory[:, n3], trajectory[:, n4]], trajectory[:, n5]], trajectory[:, n6]]
+    xdata = traj[:, n2]
+    ydata = np.c_[np.c_[np.c_[traj[:, n3], traj[:, n4]], traj[:, n5]], traj[:, n6]]
     x0 = [0.1, 0.1, 0.1, 0.1, 0.1]
     params = dict()
     MSD1 = dict()
