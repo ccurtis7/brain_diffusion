@@ -960,21 +960,21 @@ def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec, datatype, filename):
     ax = fig.add_subplot(111)
     # ax.set_title('Particle Trajectories', x=0.5, y=1.15)
 
-    ax.plot(time[1][:], MMSD[:, 0], label='3D')
-    ax.plot(time[1][:], MMSD[:, 1], label='2D xy')
-    ax.plot(time[1][:], MMSD[:, 2], label='2D xz')
-    ax.plot(time[1][:], MMSD[:, 3], label='2D yz')
+    ax.plot(time[1][:], MMSD[:, 0], linewidth=2.5, label='3D')
+    ax.plot(time[1][:], MMSD[:, 1], linewidth=2.5, label='2D xy')
+    ax.plot(time[1][:], MMSD[:, 2], linewidth=2.5, label='2D xz')
+    ax.plot(time[1][:], MMSD[:, 3], linewidth=2.5, label='2D yz')
 
     # A few adjustments to prettify the graph
     for item in ([ax.xaxis.label, ax.yaxis.label] +
                  ax.get_xticklabels() + ax.get_yticklabels()):
-        item.set_fontsize(16)
+        item.set_fontsize(36)
 
-    ax.title.set_fontsize(35)
+    ax.title.set_fontsize(45)
     ax.set_xlabel('Time (s)')
     ax.set_ylabel(datatype)
     ax.tick_params(direction='out', pad=16)
-    ax.legend(loc=(0.86, 0.86), prop={'size': 22})
+    ax.legend(loc=(0.76, 0.76), prop={'size': 35})
     plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
     plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
 
@@ -1050,9 +1050,9 @@ def plot_MSDorDeffLR(traj, n1, n2, n3, dec, datatype, filename):
 
         ax.plot(time[num][:], MSD[num][:], label='Particle {}'.format(num))
 
-    ax.plot(time1, MSD1, label='Average')
+    ax.plot(time1, MSD1, linewidth=2.5, label='Average')
     axbox = ax.get_position()
-    ax.legend(loc=(0.86, 0.90), prop={'size': 20})
+    #ax.legend(loc=(0.82, 0.82), prop={'size': 30})
     # ax.locator_params(nbins=4)
 
     # A few adjustments to prettify the graph
@@ -1115,15 +1115,15 @@ def LRfor3D2D(traj, n1, n2, n3, n4, n5, n6, dec, datatype, filename):
     # ax.set_title('Particle Trajectories', x=0.5, y=1.15)
 
     if datatype == 'MSD':
-        ax.plot(time1, MSD1[0], label='3D MSD')
-        ax.plot(time1, MSD1[1], label='2D xy MSD')
-        ax.plot(time1, MSD1[2], label='2D xz MSD')
-        ax.plot(time1, MSD1[3], label='2D yz MSD')
+        ax.plot(time1, MSD1[0], linewidth=2.5, label='3D MSD')
+        ax.plot(time1, MSD1[1], linewidth=2.5, label='2D xy MSD')
+        ax.plot(time1, MSD1[2], linewidth=2.5, label='2D xz MSD')
+        ax.plot(time1, MSD1[3], linewidth=2.5, label='2D yz MSD')
     else:
-        ax.plot(time1, Deff, label='3D D')
-        ax.plot(time1, Dxy, label='2D xy D')
-        ax.plot(time1, Dxz, label='2D xz D')
-        ax.plot(time1, Dyz, label='2D yz D')
+        ax.plot(time1, Deff, linewidth=2.5, label='3D D')
+        ax.plot(time1, Dxy, linewidth=2.5, label='2D xy D')
+        ax.plot(time1, Dxz, linewidth=2.5, label='2D xz D')
+        ax.plot(time1, Dyz, linewidth=2.5, label='2D yz D')
 
     # A few adjustments to prettify the graph
     for item in ([ax.xaxis.label, ax.yaxis.label] +
@@ -1134,7 +1134,7 @@ def LRfor3D2D(traj, n1, n2, n3, n4, n5, n6, dec, datatype, filename):
     ax.set_xlabel('Time (s)')
     ax.set_ylabel(datatype)
     ax.tick_params(direction='out', pad=16)
-    ax.legend(loc=(0.86, 0.86), prop={'size': 22})
+    ax.legend(loc=(0.79, 0.79), prop={'size': 30})
     plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
     plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
 
