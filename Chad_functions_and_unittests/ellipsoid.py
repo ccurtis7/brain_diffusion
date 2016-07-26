@@ -176,7 +176,7 @@ def maxtraj(traj, n1, n2):
         maxes[4*(total-1) + num-1, 0:3] = path[num][maxi[num][2], :]
         maxes[5*(total-1) + num-1, 0:3] = path[num][mini[num][2], :]
 
-    for num in range(1, 6*total):
+    for num in range(1, 6*(total-1)):
 
         maxes[num-1, 3] = (maxes[num, 0])**2 + (maxes[num, 1])**2 + (maxes[num, 2])**2
 
