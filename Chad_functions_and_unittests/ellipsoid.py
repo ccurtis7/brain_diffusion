@@ -114,7 +114,7 @@ def enclosed_MSD(traj, n1, n2, n3, frames):
         MMSD = MMSD + MSD[num]
     MMSD = MMSD/total1
     MMSD = MMSD[frames - 2, :]
-    disp = np.squrt(MMSD)
+    disp = np.sqrt(MMSD)
 
     pts = np.array([[wha[1],  wha[1],  0],
                     [-wha[1], -wha[1], 0],
