@@ -19,7 +19,7 @@ def mvee(points, tol=0.001):
     while err > tol:
 
         X = np.dot(np.dot(Q, np.diag(u)), np.transpose(Q))
-        M = np.diag(np.dot(np.dot(np.transpose(Q), la.inv(X)), ))
+        M = np.diag(np.dot(np.dot(np.transpose(Q), la.inv(X)), Q))
         jdx = np.argmax(M)
         step_size = (M[jdx] - d - 1)/((d+1)*(M[jdx] - 1))
         new_u = (1 - step_size)*u
@@ -78,3 +78,40 @@ def extrema(traj, n1, n2, frames):
 
     extrema = np.append(pathmax, pathmin, axis=0)
     return extrema
+
+
+def enclosed_MSD(traj, n1, n2, n3):
+    """
+    Creates a set of 6 points that will be used to form a diffusion ellipse
+    based on MSD data.
+
+    n1: particle numbers
+    n2: time
+    n3: MSDs or Deffs
+    """
+
+    # Creates an array 'particles' that contains the particle number at each frame.
+    particles = traj[:, n1]
+    total = int(max(particles))
+    total1 = total + 1
+    rawtime = traj[:, n2]
+    raw2DMSDs = traj[:, n3:n3+4]
+    MSD = dict()
+    time = dict()
+
+    # Creates an array for each trajectory containing all xyz data
+    for num in range(1, total1):
+
+        hold = np.where(particles == num)
+        itindex = hold[0]
+        min1 = min(itindex)
+        max1 = max(itindex)
+        MSD[num] = (raw2DMSDs[min1:max1, :])
+        time[num] = (rawtime[min1:max1])
+
+    MMSD = MSD[1]
+    for num in range(2, total1):
+        MMSD = MMSD + MSD[num]
+    MMSD = MMSD/total1
+
+    return MMSD
