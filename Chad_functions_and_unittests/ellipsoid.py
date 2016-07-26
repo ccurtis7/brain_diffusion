@@ -132,7 +132,7 @@ def enclosed_MSD(traj, n1, n2, n3, frames):
     return pts
 
 
-def maxtraj(traj, n1, n2, p):
+def maxtraj(traj, n1, n2):
     """
     Creates a 3-column matrix of xyz data of xyzmaxes and xyzmins from traj
     ectory dataset.
@@ -149,7 +149,7 @@ def maxtraj(traj, n1, n2, p):
     total = int(max(particles))
     total1 = total + 1
     path = dict()
-    noob = int(round(p*total))
+    # noob = int(round(p*total))
 
     # Creates an array for each trajectory containing all xyz data
     for num in range(1, total1):
@@ -165,7 +165,7 @@ def maxtraj(traj, n1, n2, p):
 
         maxi = dict()
         mini = dict()
-        maxes = np.zeros((6*(total-1), 3)) # change to 4
+        maxes = np.zeros((6*(total-1), 3))
 
     for num in range(1, total):
 
@@ -178,19 +178,13 @@ def maxtraj(traj, n1, n2, p):
         maxes[4*(total-1) + num-1, 0:3] = path[num][maxi[num][2], :]
         maxes[5*(total-1) + num-1, 0:3] = path[num][mini[num][2], :]
 
-    # for num in range(1, 6*(total-1)):
+    # blank = np.zeros((maxes.shape[0], 1))
 
-    #    maxes[num-1, 3] = (maxes[num, 0])**2 + (maxes[num, 1])**2 + (maxes[num, 2])**2
+    #for num in range(0, maxes.shape[0]):
+    #    blank[num, 0] = maxes[num, 0]**2 + maxes[num, 1]**2 + maxes[num, 2]**2
 
-    # maxes[np.argsort(-maxes[:, 3])]
-    # maxes = maxes[0:noob, 0:3]
-    blank = np.zeros((maxes.shape[0], 1))
-
-    for num in range(0, maxes.shape[0]):
-        blank[num, 0] = maxes[num, 0]**2 + maxes[num, 1]**2 + maxes[num, 2]**2
-
-    maxes = np.append(maxes, blank, 1)
-    maxes[np.argsort(-maxes[:, 3])]
-    maxes = maxes[0:noob, 0:3]
+    #maxes = np.append(maxes, blank, 1)
+    #maxes[np.argsort(-maxes[:, 3])]
+    #maxes = maxes[0:noob, 0:3]
 
     return maxes
