@@ -149,6 +149,7 @@ def maxtraj(traj, n1, n2, p):
     total = int(max(particles))
     total1 = total + 1
     path = dict()
+    noob = int(round(p*total))
 
     # Creates an array for each trajectory containing all xyz data
     for num in range(1, total1):
@@ -182,7 +183,6 @@ def maxtraj(traj, n1, n2, p):
         maxes[num-1, 3] = (maxes[num, 0])**2 + (maxes[num, 1])**2 + (maxes[num, 2])**2
 
     maxes[np.argsort(-maxes[:, 3])]
-    number = int(round(p*total)
-    # maxes=maxes[0:number, 0:2]
+    maxes = maxes[0:noob, 0:2]
 
     return maxes
