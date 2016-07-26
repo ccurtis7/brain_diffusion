@@ -182,22 +182,19 @@ def randanisorot(b, s, f, p, xs, ys, zs, th1, th2, th3):
         ttraject[num, 7] = (ttraject[num-1, 7] + ttraject[num, 20])
 
     # rotation matrix for x
-    th1 = pi/6
     R1 = np.array([[1, 0, 0],
                    [0, np.cos(th1), -np.sin(th1)],
                    [0, np.sin(th1), np.cos(th1)]])
     # rotation matrix for y
-    th2 = pi/3
     R2 = np.array([[np.cos(th2), 0, np.sin(th2)],
                    [0, 1, 0],
                    [-np.sin(th2), 0, np.cos(th2)]])
     # rotation matrix for z
-    th3 = pi/3
     R3 = np.array([[np.cos(th3), -np.sin(th3), 0],
                    [np.sin(th3), np.cos(th3), 0],
                    [0, 0, 1]])
     # total rotation matrix
-    R = np.dot(np.dot(R1,R2),R3)
+    R = np.dot(np.dot(R1, R2), R3)
 
     particle = ttraject[:, 0]
     time = ttraject[:, 1]
