@@ -132,7 +132,7 @@ def enclosed_MSD(traj, n1, n2, n3, frames):
     return pts
 
 
-def maxtraj(traj, n1, n2, p):
+def maxtraj(traj, n1, n2):
     """
     Creates a 3-column matrix of xyz data of xyzmaxes and xyzmins from traj
     ectory dataset.
@@ -165,7 +165,7 @@ def maxtraj(traj, n1, n2, p):
 
         maxi = dict()
         mini = dict()
-        maxes = np.zeros((6*(total-1), 4))
+        maxes = np.zeros((6*(total-1), 3))
 
     for num in range(1, total):
 
@@ -178,11 +178,11 @@ def maxtraj(traj, n1, n2, p):
         maxes[4*(total-1) + num-1, 0:3] = path[num][maxi[num][2], :]
         maxes[5*(total-1) + num-1, 0:3] = path[num][mini[num][2], :]
 
-    for num in range(1, 6*(total-1)):
+    # for num in range(1, 6*(total-1)):
 
-        maxes[num-1, 3] = (maxes[num, 0])**2 + (maxes[num, 1])**2 + (maxes[num, 2])**2
+    #    maxes[num-1, 3] = (maxes[num, 0])**2 + (maxes[num, 1])**2 + (maxes[num, 2])**2
 
     # maxes[np.argsort(-maxes[:, 3])]
-    maxes = maxes[0:noob, 0:3]
+    # maxes = maxes[0:noob, 0:3]
 
     return maxes
