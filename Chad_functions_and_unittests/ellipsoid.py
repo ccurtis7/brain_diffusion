@@ -32,3 +32,49 @@ def mvee(points, tol=0.001):
     c = np.dot(points, u)
     A = (1/d) * la.inv(np.dot(np.dot(points, U), np.transpose(points)) - np.dot(c, np.transpose(c)))
     return A, np.transpose(c)
+
+
+def ellipse(u, v):
+    x = rx*cos(u)*cos(v)
+    y = ry*sin(u)*cos(v)
+    z = rz*sin(v)
+    return x, y, z
+
+
+def extrema(traj, n1, n2, frames):
+    """
+    n1: column containing particle data
+    n2: start column of trajectory data
+    frames: number of frames per trajectory
+
+    extrema: array containing xyz data of start and end points of trajectories
+    """
+
+    # Creates an array 'particles' that contains the particle number at each frame.
+    particles = traj[:, n1]
+    position = traj[:, n2:n2+3]
+    total = int(max(particles))
+    total1 = total + 1
+    path = dict()
+
+    # Creates an array for each trajectory containing all xyz data
+    for num in range(1, total1):
+
+        hold = np.where(particles == num)
+        itindex = hold[0]
+        min1 = min(itindex)
+        max1 = max(itindex)
+        path[num] = (position[min1:max1, :])
+
+    pathmax = np.zeros((total-1, 3))
+    pathmin = np.zeros((total-1, 3))
+    # maxi = dict()
+
+    for num in range(1, total):
+
+        # maxi[num] = path[num].argmax(axis=0)
+        pathmax[num-1, :] = path[num][0, :]
+        pathmin[num-1, :] = path[num][frames-2, :]
+
+    extrema = np.append(pathmax, pathmin, axis=0)
+    return extrema
