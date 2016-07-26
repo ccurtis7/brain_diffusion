@@ -169,8 +169,8 @@ def maxtraj(traj, n1, n2):
 
         maxi[num] = path[num].argmax(axis=0)
         mini[num] = path[num].argmax(axis=0)
-        maxes[num-1, :] = path[num][maxi[num][0], :]
-        maxes[(total-1) + num-1, :] = path[num][mini[num][0], :]
+        maxes[num-1, 0:2] = path[num][maxi[num][0], :]
+        maxes[(total-1) + num-1, 0:2] = path[num][mini[num][0], :]
         maxes[2*(total-1) + num-1, 0:2] = path[num][maxi[num][1], :]
         maxes[3*(total-1) + num-1, 0:2] = path[num][mini[num][1], :]
         maxes[4*(total-1) + num-1, 0:2] = path[num][maxi[num][2], :]
