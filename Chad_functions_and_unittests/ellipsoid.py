@@ -144,7 +144,7 @@ def maxtraj(traj, n1, n2, frames):
 
     # Creates an array 'particles' that contains the particle number at each frame.
     particles = traj[:, n1]
-    position = thr[:, n2:n2+3]
+    position = traj[:, n2:n2+3]
     total = int(max(particles))
     total1 = total + 1
     path = dict()
