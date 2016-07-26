@@ -183,6 +183,6 @@ def maxtraj(traj, n1, n2, p):
         maxes[num-1, 3] = (maxes[num, 0])**2 + (maxes[num, 1])**2 + (maxes[num, 2])**2
 
     maxes[np.argsort(-maxes[:, 3])]
-    maxes = maxes[0:noob, 0:2]
+    maxes = maxes[0:noob, 0:3]
 
     return maxes
