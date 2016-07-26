@@ -80,7 +80,7 @@ def extrema(traj, n1, n2, frames):
     return extrema
 
 
-def enclosed_MSD(traj, n1, n2, n3):
+def enclosed_MSD(traj, n1, n2, n3, frames):
     """
     Creates a set of 6 points that will be used to form a diffusion ellipse
     based on MSD data.
@@ -113,6 +113,7 @@ def enclosed_MSD(traj, n1, n2, n3):
     for num in range(2, total1):
         MMSD = MMSD + MSD[num]
     MMSD = MMSD/total1
+    MMSD = MMSD[frames - 2, :]
     disp = np.squrt(MMSD)
 
     pts = np.array([[wha[1],  wha[1],  0],
