@@ -178,6 +178,6 @@ def maxtraj(traj, n1, n2):
 
     for num in range(1, 6*total):
 
-        maxes[num, 3] = (maxes[num, 0])**2 + (maxes[num, 1])**2 + (maxes[num, 2])**2
+        maxes[num-1, 3] = (maxes[num, 0])**2 + (maxes[num, 1])**2 + (maxes[num, 2])**2
 
     return maxes
