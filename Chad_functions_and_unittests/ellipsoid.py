@@ -113,5 +113,13 @@ def enclosed_MSD(traj, n1, n2, n3):
     for num in range(2, total1):
         MMSD = MMSD + MSD[num]
     MMSD = MMSD/total1
+    disp = np.squrt(MMSD)
 
-    return MMSD
+    pts = np.array([[wha[1],  wha[1],  0],
+                    [-wha[1], -wha[1], 0],
+                    [wha[2],  0,       wha[2]],
+                    [-wha[2], 0,       -wha[2]],
+                    [0,       wha[3],  wha[3]],
+                    [0,       -wha[3], -wha[3]]])
+
+    return pts

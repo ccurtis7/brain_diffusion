@@ -781,11 +781,11 @@ def randtraj(b, s, f, p):
     # Calculate MSDs and Deffs
     for num in range(1, frames):
 
-        ttraject[num, 11] = np.sqrt((ttraject[num, 8]-ttraject[0, 8])**2 + (ttraject[num, 9]-ttraject[0, 9])**2 +
-                                    (ttraject[num, 10]-ttraject[0, 10])**2)
-        ttraject[num, 12] = np.sqrt((ttraject[num, 8]-ttraject[0, 8])**2 + (ttraject[num, 9]-ttraject[0, 9])**2)
-        ttraject[num, 13] = np.sqrt((ttraject[num, 8]-ttraject[0, 8])**2 + (ttraject[num, 10]-ttraject[0, 10])**2)
-        ttraject[num, 14] = np.sqrt((ttraject[num, 10]-ttraject[0, 10])**2 + (ttraject[num, 9]-ttraject[0, 9])**2)
+        ttraject[num, 11] = ((ttraject[num, 8]-ttraject[0, 8])**2 + (ttraject[num, 9]-ttraject[0, 9])**2 +
+                             (ttraject[num, 10]-ttraject[0, 10])**2)
+        ttraject[num, 12] = ((ttraject[num, 8]-ttraject[0, 8])**2 + (ttraject[num, 9]-ttraject[0, 9])**2)
+        ttraject[num, 13] = ((ttraject[num, 8]-ttraject[0, 8])**2 + (ttraject[num, 10]-ttraject[0, 10])**2)
+        ttraject[num, 14] = ((ttraject[num, 10]-ttraject[0, 10])**2 + (ttraject[num, 9]-ttraject[0, 9])**2)
 
         ttraject[num, 15] = ttraject[num, 11]/(6*ttraject[num, 1])
         ttraject[num, 16] = ttraject[num, 12]/(4*ttraject[num, 1])
@@ -881,11 +881,11 @@ def randtraj2(b, s, f, p):
     # Calculate MSDs and Deffs
     for num in range(1, frames):
 
-        ttraject[num, 11] = np.sqrt((ttraject[num, 8]-ttraject[0, 8])**2 + (ttraject[num, 9]-ttraject[0, 9])**2 +
-                                    (ttraject[num, 10]-ttraject[0, 10])**2)
-        ttraject[num, 12] = np.sqrt((ttraject[num, 8]-ttraject[0, 8])**2 + (ttraject[num, 9]-ttraject[0, 9])**2)
-        ttraject[num, 13] = np.sqrt((ttraject[num, 8]-ttraject[0, 8])**2 + (ttraject[num, 10]-ttraject[0, 10])**2)
-        ttraject[num, 14] = np.sqrt((ttraject[num, 10]-ttraject[0, 10])**2 + (ttraject[num, 9]-ttraject[0, 9])**2)
+        ttraject[num, 11] = ((ttraject[num, 8]-ttraject[0, 8])**2 + (ttraject[num, 9]-ttraject[0, 9])**2 +
+                             (ttraject[num, 10]-ttraject[0, 10])**2)
+        ttraject[num, 12] = ((ttraject[num, 8]-ttraject[0, 8])**2 + (ttraject[num, 9]-ttraject[0, 9])**2)
+        ttraject[num, 13] = ((ttraject[num, 8]-ttraject[0, 8])**2 + (ttraject[num, 10]-ttraject[0, 10])**2)
+        ttraject[num, 14] = ((ttraject[num, 10]-ttraject[0, 10])**2 + (ttraject[num, 9]-ttraject[0, 9])**2)
 
         ttraject[num, 15] = ttraject[num, 11]/(6*ttraject[num, 1])
         ttraject[num, 16] = ttraject[num, 12]/(4*ttraject[num, 1])
