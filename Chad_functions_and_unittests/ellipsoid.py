@@ -118,15 +118,15 @@ def enclosed_MSD(traj, n1, n2, n3, frames):
 
     pts = np.array([[disp[1],  disp[1],  0],
                     [-disp[1], -disp[1], 0],
-                    [disp[1],  -disp[1],  0],
-                    [-disp[1], disp[1], 0],
-                    [disp[2],  0,       disp[2]],
-                    [-disp[2], 0,       -disp[2]],
-                    [-disp[2],  0,       disp[2]],
-                    [disp[2], 0,       -disp[2]],
-                    [0,       disp[3],  disp[3]],
-                    [0,       -disp[3], -disp[3]]
+                    [disp[1],  -disp[1], 0],
+                    [-disp[1], disp[1],  0],
+                    [disp[2],  0,        disp[2]],
+                    [-disp[2], 0,        -disp[2]],
+                    [-disp[2], 0,        disp[2]],
+                    [disp[2],  0,        -disp[2]],
+                    [0,       disp[3],   disp[3]],
+                    [0,       -disp[3],  -disp[3]],
                     [0,       -disp[3],  disp[3]],
-                    [0,       disp[3], -disp[3]]])
+                    [0,       disp[3],   -disp[3]]])
 
     return pts
