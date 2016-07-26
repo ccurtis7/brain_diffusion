@@ -132,7 +132,7 @@ def enclosed_MSD(traj, n1, n2, n3, frames):
     return pts
 
 
-def maxtraj(traj, n1, n2, frames):
+def maxtraj(traj, n1, n2):
     """
     Creates a 3-column matrix of xyz data of xyzmaxes and xyzmins from traj
     ectory dataset.
