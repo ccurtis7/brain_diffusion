@@ -371,12 +371,12 @@ def multrandanisorot(b, s, f, p, xs, ys, zs, th1, th2, th3):
     """
 
     parts = p
-    one = randaniso(b, s, f, 1, xs, ys, zs, th1, th2, th3)
+    one = randanisorot(b, s, f, 1, xs, ys, zs, th1, th2, th3)
     counter = 1
 
     while counter < p + 1:
         counter = counter + 1
-        one = np.append(one, randaniso(b, s, f, counter, xs, ys, zs, th1, th2, th3), axis=0)
+        one = np.append(one, randanisorot(b, s, f, counter, xs, ys, zs, th1, th2, th3), axis=0)
 
     return one
 
