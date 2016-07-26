@@ -534,7 +534,7 @@ def plot_trajectories3D(traj, n1, n2, n3, dec, filename):
     plt.savefig('{}.png'.format(filename), bbox_inches='tight')
 
 
-def plot_3Doverlay(traj, n1, n2, dec, filename):
+def plot_3Doverlay(traj, n1, n2, dec, filename, xr, yr, zr):
     """
     This function creates a single 3D plot from trajectory data.  This dataset
     must include a column of particle numbers as well as the x, y, and z
@@ -547,6 +547,9 @@ def plot_3Doverlay(traj, n1, n2, dec, filename):
     a range)
     dec: how many decimals you would like to be displayed in the graph.
     filename: what you want to name the file.  Must be in ''.
+    xr: defines the range of x
+    yr: defines the range of y
+    zr: defines the range of z
     Can also use plt.show() afterwards to preview your data, even if it skews the title and legend a bit.
     """
 
@@ -577,7 +580,7 @@ def plot_3Doverlay(traj, n1, n2, dec, filename):
         ax.plot(path[num][:, 0], path[num][:, 1], path[num][:, 2], label='Particle {}'.format(num))
 
     axbox = ax.get_position()
-    #ax.legend(loc=(0.86, 0.90), prop={'size': 20})
+    # ax.legend(loc=(0.86, 0.90), prop={'size': 20})
     ax.locator_params(nbins=4)
     ax.view_init(elev=38, azim=72)
 
@@ -591,6 +594,9 @@ def plot_3Doverlay(traj, n1, n2, dec, filename):
     plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
     plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
     plt.gca().zaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
+    plt.gca().set_xlim([-xr, xr])
+    plt.gca().set_ylim([-yr, yr])
+    plt.gca().set_zlim([-zr, zr])
 
     # Save your figure
     plt.savefig('{}.png'.format(filename), bbox_inches='tight')
