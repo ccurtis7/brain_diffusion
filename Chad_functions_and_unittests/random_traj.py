@@ -197,7 +197,7 @@ def randanisorot(b, s, f, p, xs, ys, zs, th1, th2, th3):
                    [np.sin(th3), np.cos(th3), 0],
                    [0, 0, 1]])
     # total rotation matrix
-    R = R1*R2*R3
+    R = np.dot(np.dot(R1,R2),R3)
 
     particle = ttraject[:, 0]
     time = ttraject[:, 1]
