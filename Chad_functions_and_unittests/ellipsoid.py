@@ -83,7 +83,7 @@ def extrema(traj, n1, n2, frames):
 def enclosed_MSD(traj, n1, n2, n3, frames):
     """
     Creates a set of 6 points that will be used to form a diffusion ellipse
-    based on MSD data.
+    based on MSD data. DEFUNCT
 
     n1: particle numbers
     n2: time
@@ -130,3 +130,50 @@ def enclosed_MSD(traj, n1, n2, n3, frames):
                     [0,       disp[3],   -disp[3]]])
 
     return pts
+
+
+def maxtraj(traj, n1, n2, frames):
+    """
+    Creates a 3-column matrix of xyz data of xyzmaxes and xyzmins from traj
+    ectory dataset.
+
+    traj: original trajectory dataset
+    n1: particle numbers (0)
+    n2: xyz data (8)
+    """
+
+    # Creates an array 'particles' that contains the particle number at each frame.
+    particles = traj[:, n1]
+    position = thr[:, n2:n2+3]
+    total = int(max(particles))
+    total1 = total + 1
+    path = dict()
+
+    # Creates an array for each trajectory containing all xyz data
+    for num in range(1, total1):
+
+        hold = np.where(particles == num)
+        itindex = hold[0]
+        min1 = min(itindex)
+        max1 = max(itindex)
+        path[num] = (position[min1:max1, :])
+
+        pathmax = np.zeros((total-1, 3))
+        pathmin = np.zeros((total-1, 3))
+
+        maxi = dict()
+        mini = dict()
+        maxes = np.zeros((6*(total-1), 3))
+
+        for num in range(1, total):
+
+            maxi[num] = path[num].argmax(axis=0)
+            mini[num] = path[num].argmax(axis=0)
+            maxes[num-1, :] = path[num][maxi[num][0], :]
+            maxes[(total-1) + num-1, :] = path[num][mini[num][0], :]
+            maxes[2*(total-1) + num-1, :] = path[num][maxi[num][1], :]
+            maxes[3*(total-1) + num-1, :] = path[num][mini[num][1], :]
+            maxes[4*(total-1) + num-1, :] = path[num][maxi[num][2], :]
+            maxes[5*(total-1) + num-1, :] = path[num][mini[num][2], :]
+
+        return maxes
