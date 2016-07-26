@@ -163,7 +163,7 @@ def maxtraj(traj, n1, n2):
 
         maxi = dict()
         mini = dict()
-        maxes = np.zeros((6*(total-1), 3))
+        maxes = np.zeros((6*(total-1), 4))
 
     for num in range(1, total):
 
@@ -171,9 +171,13 @@ def maxtraj(traj, n1, n2):
         mini[num] = path[num].argmax(axis=0)
         maxes[num-1, :] = path[num][maxi[num][0], :]
         maxes[(total-1) + num-1, :] = path[num][mini[num][0], :]
-        maxes[2*(total-1) + num-1, :] = path[num][maxi[num][1], :]
-        maxes[3*(total-1) + num-1, :] = path[num][mini[num][1], :]
-        maxes[4*(total-1) + num-1, :] = path[num][maxi[num][2], :]
-        maxes[5*(total-1) + num-1, :] = path[num][mini[num][2], :]
+        maxes[2*(total-1) + num-1, 0:2] = path[num][maxi[num][1], :]
+        maxes[3*(total-1) + num-1, 0:2] = path[num][mini[num][1], :]
+        maxes[4*(total-1) + num-1, 0:2] = path[num][maxi[num][2], :]
+        maxes[5*(total-1) + num-1, 0:2] = path[num][mini[num][2], :]
+
+    for num in range(1, 6*total):
+
+        maxes[num, 3] = (maxes[num, 0])**2 + (maxes[num, 1])**2 + (maxes[num, 2])**2
 
     return maxes
