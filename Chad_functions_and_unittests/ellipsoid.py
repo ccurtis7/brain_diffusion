@@ -377,3 +377,38 @@ def rotmat(traj, n1, n2, A):
     traj[:, n2 + 2] = rotpaths[:, 2]
 
     return traj
+
+
+def rotmat2(traj, n1, n2, p, q):
+    """
+    A similar function to rotmat, this function will rotate any given three-coor
+    dinate dataset of trajectories (traj) to align it with the xyz axes.  This
+    matrix can be constructed manually or can be determined from the funtion
+    mvee.
+
+    Inputs:
+    traj: trajectory dataset
+    n1: particle number column (normally 0)
+    n2: first column in xyz dataset (others are assumed to follow)
+    A: rotation matrix (3 x 3 numpy array)
+
+    Outputs:
+    A modified form of traj with the columns defined by n2 being replaced with
+    new rotated coordinates.
+    """
+
+    rotate = np.zeros((traj.shape[0], 3))
+    but = maxtraj(traj, n1, n2, p, q)
+    A, centroid = mvee(but)
+    U, D, V = la.svd(A)
+
+    rotate[:, 0] = traj[:, n2]
+    rotate[:, 1] = traj[:, n2 + 1]
+    rotate[:, 2] = traj[:, n2 + 2]
+    rotpaths = np.transpose(np.dot(V, np.transpose(rotate)))
+
+    traj[:, n2] = rotpaths[:, 0]
+    traj[:, n2 + 1] = rotpaths[:, 1]
+    traj[:, n2 + 2] = rotpaths[:, 2]
+
+    return traj
