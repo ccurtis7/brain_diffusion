@@ -256,7 +256,7 @@ def plot_mvee(mtraj, dec, limit, filename):
     plt.savefig('{}.png'.format(filename), bbox_inches='tight')
 
 
-def plot_mveeoverl(traj, n1, n2, p, dec, filename, limit):
+def plot_mveeoverl(traj, n1, n2, p, q, dec, filename, limit):
     """
     This function creates a single 3D plot from trajectory data.  This dataset
     must include a column of particle numbers as well as the x, y, and z
@@ -289,7 +289,7 @@ def plot_mveeoverl(traj, n1, n2, p, dec, filename, limit):
         max1 = max(itindex)
         path[num] = (position[min1:max1, :])
 
-    but = maxtraj(traj, n1, n2, p)
+    but = maxtraj(traj, n1, n2, p, q)
 
     pi = np.pi
     sin = np.sin
