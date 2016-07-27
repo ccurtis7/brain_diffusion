@@ -365,7 +365,7 @@ def rotmat(traj, n1, n2, A):
     new rotated coordinates.
     """
 
-    rotate = np.zeros((frames, 3))
+    rotate = np.zeros((traj.shape[0], 3))
 
     rotate[:, 0] = traj[:, n2]
     rotate[:, 1] = traj[:, n2 + 1]
