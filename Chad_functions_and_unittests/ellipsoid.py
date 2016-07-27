@@ -375,3 +375,5 @@ def rotmat(traj, n1, n2, A):
     traj[:, n2] = rotpaths[:, 0]
     traj[:, n2 + 1] = rotpaths[:, 1]
     traj[:, n2 + 2] = rotpaths[:, 2]
+
+    return traj
