@@ -345,3 +345,33 @@ def plot_mveeoverl(traj, n1, n2, p, q, scale, dec, filename, limit):
     plt.show()
     # Save your figure
     plt.savefig('{}.png'.format(filename), bbox_inches='tight')
+
+
+def rotmat(traj, n1, n2, A):
+    """
+    A similar function to roti, this function will rotate any given three-coor
+    dinate dataset of trajectories (traj) according to the given rotation
+    matrix A.  This matrix can be constructed manually or can be determined
+    from the funtion mvee.
+
+    Inputs:
+    traj: trajectory dataset
+    n1: particle number column (normally 0)
+    n2: first column in xyz dataset (others are assumed to follow)
+    A: rotation matrix (3 x 3 numpy array)
+
+    Outputs:
+    A modified form of traj with the columns defined by n2 being replaced with
+    new rotated coordinates.
+    """
+
+    rotate = np.zeros((frames, 3))
+
+    rotate[:, 0] = traj[:, n2]
+    rotate[:, 1] = traj[:, n2 + 1]
+    rotate[:, 2] = traj[:, n2 + 2]
+    rotpaths = np.transpose(np.dot(A, np.transpose(rotate)))
+
+    traj[:, n2] = rotpaths[:, 0]
+    traj[:, n2 + 1] = rotpaths[:, 1]
+    traj[:, n2 + 2] = rotpaths[:, 2]
