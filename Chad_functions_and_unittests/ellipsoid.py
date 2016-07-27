@@ -143,7 +143,7 @@ def enclosed_MSD(traj, n1, n2, n3, frames):
     return pts
 
 
-def maxtraj(traj, n1, n2, p):
+def maxtraj(traj, n1, n2, p, q):
     """
     Creates a 3-column matrix of xyz data of xyzmaxes and xyzmins from traj
     ectory dataset.
@@ -152,6 +152,7 @@ def maxtraj(traj, n1, n2, p):
     n1: particle numbers (0)
     n2: xyz data (8)
     p: percentile to include in dataset
+    q: upper percentil to exclude
     """
 
     # Creates an array 'particles' that contains the particle number at each frame.
@@ -161,6 +162,7 @@ def maxtraj(traj, n1, n2, p):
     total1 = total + 1
     path = dict()
     noob = int(round(p*total))
+    noob1 = int(round(q*total))
 
     # Creates an array for each trajectory containing all xyz data
     for num in range(1, total1):
@@ -196,7 +198,7 @@ def maxtraj(traj, n1, n2, p):
 
     maxes = np.append(maxes, blank, 1)
     maxes = maxes[np.argsort(-maxes[:, 3])]
-    maxes = maxes[0:noob, 0:3]
+    maxes = maxes[noob1:noob, 0:3]
 
     return maxes
 
