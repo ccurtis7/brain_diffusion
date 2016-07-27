@@ -191,6 +191,10 @@ def maxtraj(traj, n1, n2, p):
 
 
 def plot_mvee(mtraj, dec, limit):
+    pi = np.pi
+    sin = np.sin
+    cos = np.cos
+
     A, centroid = mvee(mtraj)
     U, D, V = la.svd(A)
     rx, ry, rz = 1./np.sqrt(D)
