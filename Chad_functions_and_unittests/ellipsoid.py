@@ -188,3 +188,47 @@ def maxtraj(traj, n1, n2, p):
     maxes = maxes[0:noob, 0:3]
 
     return maxes
+
+
+def plot_mvee(mtraj, dec, limit):
+    A, centroid = mvee(mtraj)
+    U, D, V = la.svd(A)
+    rx, ry, rz = 1./np.sqrt(D)
+    u, v = np.mgrid[0:2*pi:20j, -pi/2:pi/2:10j]
+
+    def ellipse(u, v):
+        x = rx*cos(u)*cos(v)
+        y = ry*sin(u)*cos(v)
+        z = rz*sin(v)
+        return x, y, z
+
+    E = np.dstack(ellipse(u, v))
+    E = np.dot(E, V) + centroid
+    x, y, z = np.rollaxis(E, axis=-1)
+
+    fig = plt.figure(figsize=(24, 18), dpi=80)
+    ax = fig.add_subplot(111, projection='3d')
+
+    ax.plot_surface(x, y, z, cstride=1, rstride=1, alpha=0.05)
+    ax.scatter(mtraj[:, 0], mtraj[:, 1], mtraj[:, 2])
+
+    axbox = ax.get_position()
+    # ax.legend(loc=(0.86, 0.90), prop={'size': 20})
+    ax.locator_params(nbins=6)
+    ax.view_init(elev=38, azim=72)
+
+    plt.gca().set_xlim([-limit, limit])
+    plt.gca().set_ylim([-limit, limit])
+    plt.gca().set_zlim([-limit, limit])
+
+    for item in ([ax.xaxis.label, ax.yaxis.label, ax.zaxis.label] +
+                 ax.get_xticklabels() + ax.get_yticklabels() + ax.get_zticklabels()):
+        item.set_fontsize(13)
+
+    ax.title.set_fontsize(35)
+    ax.tick_params(direction='out', pad=16)
+    plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
+    plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
+    plt.gca().zaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
+
+    plt.show()
