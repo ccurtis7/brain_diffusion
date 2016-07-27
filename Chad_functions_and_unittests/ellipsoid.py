@@ -2,6 +2,7 @@ from __future__ import division
 import numpy as np
 import numpy.linalg as la
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 
 def mvee(points, tol=0.001):
     N, d = points.shape
