@@ -580,8 +580,8 @@ def plot_3Doverlay(traj, n1, n2, dec, filename, xr, yr, zr):
         ax.plot(path[num][:, 0], path[num][:, 1], path[num][:, 2], label='Particle {}'.format(num))
 
     axbox = ax.get_position()
-    # ax.legend(loc=(0.86, 0.90), prop={'size': 20})
-    ax.locator_params(nbins=4)
+    ax.legend(loc=(0.86, 0.90), prop={'size': 20})
+    ax.locator_params(nbins=6)
     ax.view_init(elev=38, azim=72)
 
     # A few adjustments to prettify the graph
