@@ -275,7 +275,7 @@ def plot_mveeoverl(traj, n1, n2, p, q, scale, dec, filename, limit):
 
     # Creates an array 'particles' that contains the particle number at each frame.
     particles = traj[:, n1]
-    position = traj[:, n2:n2+3]
+    position = traj[:, n2:n2+4]
     total = int(max(particles))
     total1 = total + 1
     path = dict()
