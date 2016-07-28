@@ -342,7 +342,6 @@ def plot_mveeoverl(traj, n1, n2, p, q, scale, dec, filename, limit):
     plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
     plt.gca().zaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
 
-    plt.show()
     # Save your figure
     plt.savefig('{}.png'.format(filename), bbox_inches='tight')
 
