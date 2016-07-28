@@ -324,7 +324,7 @@ def plot_mveeoverl(traj, n1, n2, p, q, scale, dec, filename, limit):
     ax.plot_surface(x, y, z, cstride=1, rstride=1, alpha=0.05)
 
     axbox = ax.get_position()
-    ax.legend(loc=(0.86, 0.90), prop={'size': 20})
+    # ax.legend(loc=(0.86, 0.90), prop={'size': 20})
     ax.locator_params(nbins=6)
     ax.view_init(elev=38, azim=72)
 
@@ -419,7 +419,7 @@ def plot_mveeoverl2(traj, n1, n2, p, q, scale, dec, filename, limit):
     ax.plot_surface(x, y, z, cstride=1, rstride=1, alpha=0.05)
 
     axbox = ax.get_position()
-    ax.legend(loc=(0.86, 0.90), prop={'size': 20})
+    # ax.legend(loc=(0.86, 0.90), prop={'size': 20})
     ax.locator_params(nbins=6)
     ax.view_init(elev=38, azim=72)
 
