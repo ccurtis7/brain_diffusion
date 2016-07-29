@@ -575,7 +575,7 @@ def MSDS(traj, n1, n2, n3):
     """
 
     msd, frames = ellipsax(traj, n1, n2, n3, 0)
-    msds = np.zeros((int(max(frames)), 3))
+    msds = np.zeros((int(max(frames)), 4))
     for num in range(1, int(max(frames))):
         msds[num, :], frames = ellipsax(traj, n1, n2, n3, num)
     return msds, frames
