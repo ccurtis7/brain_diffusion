@@ -572,7 +572,7 @@ def plot_3Doverlay(traj, n1, n2, dec, filename, xr, yr, zr):
     # Creates figure
     fig = plt.figure(figsize=(24, 18), dpi=80)
     ax = fig.add_subplot(111, projection='3d')
-    ax.set_title('Particle Trajectories', x=0.5, y=1.15)
+    # ax.set_title('Particle Trajectories', x=0.5, y=1.15)
 
     # Plots individual trajectories
     for num in range(1, total1):
