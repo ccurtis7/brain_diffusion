@@ -506,3 +506,160 @@ def rotmat2(traj, n1, n2, p, q):
     traj[:, n2 + 2] = rotpaths[:, 2]
 
     return traj
+
+
+def ellipsax(traj, n1, n2, n3, t):
+    """
+    Calculates the in all three directions, xyz, for a diffusion dataset that
+    has been pre-rotated using rotmat2.  The MSDs are calculated at the speci
+    fied frame t.  Due to some confusion in my random dataset generator, there
+    is no distinction between the time column and the frame column.  This makes
+    this code less robust atm.  I need certain aspects of the code to be int
+    egers and certain aspects to reflect time accurately.  This is fine for a
+    random dataset, but not a real dataset.  Also, this code will NOT work if
+    there are missing frames in the dataset.
+
+    This code is used as an input function to "MSDS" to calculate for all times
+    in the dataset.
+
+    Outputs data in an 1 X 3 array (MSD) representing xyz msds as well as a
+    time/frame column for a single particle (which should be identical for all
+    particles for the code to work).
+
+    n1: particle number column
+    n2: position column (x)
+    n3: time/frame column
+    t: specified frame at which to calculate MSDs
+    """
+    particles = traj[:, n1]
+    position = traj[:, n2:n2+3]
+    total = int(max(particles))
+    total1 = total + 1
+    path = dict()
+    time = dict()
+    spreadxyz = np.zeros((total, 3))
+
+    # Creates an array for each trajectory containing all xyz data
+    for num in range(1, total1):
+
+        hold = np.where(particles == num)
+        itindex = hold[0]
+        min1 = min(itindex)
+        max1 = max(itindex)
+
+        time[num] = traj[min1:max1, n3]
+        hold1 = np.where(time[num] > t)
+        itindex1 = hold1[0][0]
+
+        path[num] = (position[min1:max1, :])[0:itindex1]
+        # spreadxyz[num-1] = np.square(np.ptp(path[num], axis=0))
+        spreadxyz[num-1] = np.square(path[num][t, :]-path[num][0, :])
+
+    MSD = np.array([np.average(spreadxyz[:, 0]), np.average(spreadxyz[:, 1]), np.average(spreadxyz[:, 2])])
+
+    return MSD, time[1]
+
+
+def MSDS(traj, n1, n2, n3):
+    """
+    This code uses ellipsax to create an array of MSDs at every timepoint in a
+    trajectory dataset.
+
+    Output is in the form of a time X 3 array (msds), as well as a time/frame
+    array (frames).
+    """
+
+    msd, frames = ellipsax(traj, n1, n2, n3, 0)
+    msds = np.zeros((int(max(frames)), 3))
+    for num in range(1, int(max(frames))):
+        msds[num, :], frames = ellipsax(traj, n1, n2, n3, num)
+    return msds, frames
+
+
+def andiff(traj, n1, n2, n3):
+    """
+    Calculates the 3 principle diffusion coefficients of an anisotropic diff
+    usion dataset that has been properly rotated using rotmat2.  Uses the funct
+    ion "MSDS" to perform calculations.
+    """
+
+    MMSD, frames = MSDS(traj, n1, n2, n3)  # (thr, 0, 8, 1)
+    frames1 = frames[0:frames.shape[0]-1]
+    diff = np.zeros(MMSD.shape)
+    diff[:, 0] = MMSD[:, 0]/(2*frames1)
+    diff[:, 1] = MMSD[:, 1]/(2*frames1)
+    diff[:, 2] = MMSD[:, 2]/(2*frames1)
+
+    return diff, frames
+
+
+def plot_anisoMSDS(traj, n1, n2, n3, dec, filename):
+    """
+    Calculates the 3 principles MSDs (xyz) of a pre-rotated dataset using "MSDS"
+    and plots them.
+    """
+
+    MMSD, frames = MSDS(traj, n1, n2, n3)  # (thr, 0, 8, 1)
+    frames1 = frames[0:frames.shape[0]-1]
+
+    # Creates figure
+    fig = plt.figure(figsize=(24, 18), dpi=80)
+    ax = fig.add_subplot(111)
+    # ax.set_title('Particle Trajectories', x=0.5, y=1.15)
+
+    ax.plot(frames1, MMSD[:, 0], linewidth=2.5, label='x MSD')
+    ax.plot(frames1, MMSD[:, 1], linewidth=2.5, label='y MSD')
+    ax.plot(frames1, MMSD[:, 2], linewidth=2.5, label='z MSD')
+
+    # A few adjustments to prettify the graph
+    for item in ([ax.xaxis.label, ax.yaxis.label] +
+                 ax.get_xticklabels() + ax.get_yticklabels()):
+        item.set_fontsize(36)
+
+    ax.title.set_fontsize(45)
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel('MSD (um2)')
+    ax.tick_params(direction='out', pad=16)
+    ax.legend(loc=(0.76, 0.76), prop={'size': 35})
+    plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
+    plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
+
+    # Save your figure
+    plt.savefig('{}.png'.format(filename), bbox_inches='tight')
+
+
+def plot_anisodiff(traj, n1, n2, n3, dec, filename):
+    """
+    Calculates the 3 principle diffusion coefficients of a pre-rotated trajector
+    y dataset and plots them.
+    """
+
+    diff, frames = andiff(traj, n1, n2, n3)  # (thr, 0, 8, 1)
+    frames1 = frames[0:frames.shape[0]-1]
+
+    # Creates figure
+    fig = plt.figure(figsize=(24, 18), dpi=80)
+    ax = fig.add_subplot(111)
+    # ax.set_title('Particle Trajectories', x=0.5, y=1.15)
+
+    ax.plot(frames1, diff[:, 0], linewidth=2.5, label='Dx')
+    ax.plot(frames1, diff[:, 1], linewidth=2.5, label='Dy')
+    ax.plot(frames1, diff[:, 2], linewidth=2.5, label='Dz')
+
+    # A few adjustments to prettify the graph
+    for item in ([ax.xaxis.label, ax.yaxis.label] +
+                 ax.get_xticklabels() + ax.get_yticklabels()):
+        item.set_fontsize(36)
+
+    ax.title.set_fontsize(45)
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel('Diffusion Coefficient (um2/s)')
+    ax.tick_params(direction='out', pad=16)
+    ax.legend(loc=(0.76, 0.76), prop={'size': 35})
+    plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
+    plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
+
+    # Save your figure
+    plt.savefig('{}.png'.format(filename), bbox_inches='tight')
+
+    return diff
