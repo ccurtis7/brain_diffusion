@@ -628,7 +628,7 @@ def plot_anisoMSDS(traj, n1, n2, n3, dec, filename):
     plt.savefig('{}.png'.format(filename), bbox_inches='tight')
 
 
-def plot_anisodiff(traj, n1, n2, n3, dec, filename):
+def plot_anisodiff(traj, n1, n2, n3, dec, filename, limit1, limit2):
     """
     Calculates the 3 principle diffusion coefficients of a pre-rotated trajector
     y dataset and plots them.
@@ -658,6 +658,9 @@ def plot_anisodiff(traj, n1, n2, n3, dec, filename):
     ax.legend(loc=(0.76, 0.76), prop={'size': 35})
     plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
     plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
+
+    # plt.gca().set_xlim([-limit, limit])
+    plt.gca().set_ylim([limit1, limit2])
 
     # Save your figure
     plt.savefig('{}.png'.format(filename), bbox_inches='tight')
