@@ -556,7 +556,11 @@ def ellipsax(traj, n1, n2, n3, t):
         # spreadxyz[num-1] = np.square(np.ptp(path[num], axis=0))
         spreadxyz[num-1] = np.square(path[num][t, :]-path[num][0, :])
 
-    MSD = np.array([np.average(spreadxyz[:, 0]), np.average(spreadxyz[:, 1]), np.average(spreadxyz[:, 2])])
+    mx = np.average(spreadxyz[:, 0])
+    my = np.average(spreadxyz[:, 1])
+    mz = np.average(spreadxyz[:, 2])
+    mt = mx + my + mz
+    MSD = np.array([mx, my, mz, mt])
 
     return MSD, time[1]
 
@@ -590,6 +594,7 @@ def andiff(traj, n1, n2, n3):
     diff[:, 0] = MMSD[:, 0]/(2*frames1)
     diff[:, 1] = MMSD[:, 1]/(2*frames1)
     diff[:, 2] = MMSD[:, 2]/(2*frames1)
+    diff[:, 3] = MMSD[:, 3]/(6*frames1)
 
     return diff, frames
 
@@ -648,7 +653,7 @@ def plot_anisodiff(traj, n1, n2, n3, dec, filename, limit1, limit2, n4):
     ax = fig.add_subplot(111)
     # ax.set_title('Particle Trajectories', x=0.5, y=1.15)
 
-    ax.plot(traj[:, n3], traj[:, n4], linewidth=2.5, label='3D D')
+    ax.plot(frames1, diff[:, 3], linewidth=2.5, label='3D D')
     ax.plot(frames1, diff[:, 0], linewidth=2.5, label='Dx')
     ax.plot(frames1, diff[:, 1], linewidth=2.5, label='Dy')
     ax.plot(frames1, diff[:, 2], linewidth=2.5, label='Dz')
