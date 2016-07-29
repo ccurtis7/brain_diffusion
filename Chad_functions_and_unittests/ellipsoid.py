@@ -581,14 +581,13 @@ def MSDS(traj, n1, n2, n3):
     return msds, frames
 
 
-def andiff(traj, n1, n2, n3):
+def andiff(MMSD, frames):
     """
     Calculates the 3 principle diffusion coefficients of an anisotropic diff
     usion dataset that has been properly rotated using rotmat2.  Uses the funct
     ion "MSDS" to perform calculations.
     """
 
-    MMSD, frames = MSDS(traj, n1, n2, n3)  # (thr, 0, 8, 1)
     frames1 = frames[0:frames.shape[0]-1]
     diff = np.zeros(MMSD.shape)
     diff[:, 0] = MMSD[:, 0]/(2*frames1)
@@ -599,13 +598,12 @@ def andiff(traj, n1, n2, n3):
     return diff, frames
 
 
-def plot_anisoMSDS(traj, n1, n2, n3, dec, filename):
+def plot_anisoMSDS(MMSD, frames, dec, filename):
     """
     Calculates the 3 principles MSDs (xyz) of a pre-rotated dataset using "MSDS"
     and plots them.
     """
 
-    MMSD, frames = MSDS(traj, n1, n2, n3)  # (thr, 0, 8, 1)
     frames1 = frames[0:frames.shape[0]-1]
 
     # Creates figure
@@ -634,7 +632,7 @@ def plot_anisoMSDS(traj, n1, n2, n3, dec, filename):
     plt.savefig('{}.png'.format(filename), bbox_inches='tight')
 
 
-def plot_anisodiff(traj, n1, n2, n3, dec, filename, limit1, limit2, n4):
+def plot_anisodiff(diff, frames, dec, filename, limit1, limit2, n4):
     """
     Calculates the 3 principle diffusion coefficients of a pre-rotated trajector
     y dataset and plots them.
@@ -645,7 +643,6 @@ def plot_anisodiff(traj, n1, n2, n3, dec, filename, limit1, limit2, n4):
     n4: MSD column (11 in random dataset)
     """
 
-    diff, frames = andiff(traj, n1, n2, n3)  # (thr, 0, 8, 1)
     frames1 = frames[0:frames.shape[0]-1]
 
     # Creates figure
