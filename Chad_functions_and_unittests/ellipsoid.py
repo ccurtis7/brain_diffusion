@@ -4,6 +4,7 @@ import numpy.linalg as la
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
+
 def mvee(points, tol=0.001):
     """
     Defines a minimum volume enclosing ellipsoid (MVEE) surrounding all the
@@ -628,10 +629,15 @@ def plot_anisoMSDS(traj, n1, n2, n3, dec, filename):
     plt.savefig('{}.png'.format(filename), bbox_inches='tight')
 
 
-def plot_anisodiff(traj, n1, n2, n3, dec, filename, limit1, limit2):
+def plot_anisodiff(traj, n1, n2, n3, dec, filename, limit1, limit2, n4):
     """
     Calculates the 3 principle diffusion coefficients of a pre-rotated trajector
     y dataset and plots them.
+
+    n1: particle numbers
+    n2: first column in xyz dataset
+    n3: time or frame column
+    n4: MSD column (11 in random dataset)
     """
 
     diff, frames = andiff(traj, n1, n2, n3)  # (thr, 0, 8, 1)
@@ -642,6 +648,7 @@ def plot_anisodiff(traj, n1, n2, n3, dec, filename, limit1, limit2):
     ax = fig.add_subplot(111)
     # ax.set_title('Particle Trajectories', x=0.5, y=1.15)
 
+    ax.plot(traj[:, n3], traj[:, n4], linewidth=2.5, label='3D D')
     ax.plot(frames1, diff[:, 0], linewidth=2.5, label='Dx')
     ax.plot(frames1, diff[:, 1], linewidth=2.5, label='Dy')
     ax.plot(frames1, diff[:, 2], linewidth=2.5, label='Dz')
