@@ -928,7 +928,7 @@ def multrandtraj(b, s, f, p):
     return one
 
 
-def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec, datatype, filename):
+def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec, datatype, filename, limit1, limit2):
     """
     Plots the MSDs or Deffs from a trajectory dataset.
 
@@ -983,6 +983,9 @@ def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec, datatype, filename):
     ax.legend(loc=(0.80, 0.10), prop={'size': 35})
     plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
     plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
+
+    # plt.gca().set_xlim([-limit, limit])
+    plt.gca().set_ylim([limit1, limit2])
 
     # Save your figure
     plt.savefig('{}.png'.format(filename), bbox_inches='tight')
