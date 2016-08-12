@@ -930,11 +930,11 @@ def multrandtraj(b, s, f, p):
 
 def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec, datatype, filename):
     """
-    Plots the MSDs from a trajectory dataset.
+    Plots the MSDs or Deffs from a trajectory dataset.
 
-    n1: particle numbers
-    n2: time
-    n3: MSDs or Deffs
+    n1: particle numbers (typically 0)
+    n2: time (typically 1)
+    n3: MSDs or Deffs (11 or 15 typically)
     """
 
     # Creates an array 'particles' that contains the particle number at each frame.
@@ -980,7 +980,7 @@ def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec, datatype, filename):
     ax.set_xlabel('Time (s)')
     ax.set_ylabel(datatype)
     ax.tick_params(direction='out', pad=16)
-    ax.legend(loc=(0.76, 0.76), prop={'size': 35})
+    ax.legend(loc=(0.76, 0.26), prop={'size': 35})
     plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
     plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
 
