@@ -966,10 +966,10 @@ def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec, datatype, filename, limit1, lim
     ax = fig.add_subplot(111)
     # ax.set_title('Particle Trajectories', x=0.5, y=1.15)
 
-    ax.plot(time[1][:], MMSD[:, 0], linewidth=2.5, label='3D')
-    ax.plot(time[1][:], MMSD[:, 1], linewidth=2.5, label='2D xy')
-    ax.plot(time[1][:], MMSD[:, 2], linewidth=2.5, label='2D xz')
-    ax.plot(time[1][:], MMSD[:, 3], linewidth=2.5, label='2D yz')
+    ax.plot(time[1][:], MMSD[:, 0], linewidth=4, label='3D')
+    ax.plot(time[1][:], MMSD[:, 1], linewidth=4, label='2D xy')
+    ax.plot(time[1][:], MMSD[:, 2], linewidth=4, label='2D xz')
+    ax.plot(time[1][:], MMSD[:, 3], linewidth=4, label='2D yz')
 
     # A few adjustments to prettify the graph
     for item in ([ax.xaxis.label, ax.yaxis.label] +
