@@ -587,7 +587,7 @@ def plot_3Doverlay(traj, n1, n2, dec, filename, xr, yr, zr):
     # A few adjustments to prettify the graph
     for item in ([ax.xaxis.label, ax.yaxis.label, ax.zaxis.label] +
                  ax.get_xticklabels() + ax.get_yticklabels() + ax.get_zticklabels()):
-        item.set_fontsize(35)
+        item.set_fontsize(16)
 
     ax.title.set_fontsize(35)
     ax.tick_params(direction='out', pad=16)
