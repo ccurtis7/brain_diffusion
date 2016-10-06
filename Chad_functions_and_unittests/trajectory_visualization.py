@@ -1149,3 +1149,202 @@ def LRfor3D2D(traj, n1, n2, n3, n4, n5, n6, dec, datatype, filename):
 
     # Save your figure
     plt.savefig('{}.png'.format(filename), bbox_inches='tight')
+
+
+def fillin(data):
+    """
+    This function is perfect.  It shifts the frames by the startframe and fills in any blank frames.
+    """
+    def startshift(data1):
+        startframe = data1[0, 1]
+        data1[:, 1] = data1[:, 1] - startframe
+        return data1
+
+    data = startshift(data)
+
+    shap = int(max(data[:, 1])) + 1
+    filledin = np.zeros((shap, 5))
+    filledin[0, :] = data[0, :]
+
+    count = 0
+    new = 0
+    other = 0
+    tot = 0
+
+    for num in range(1, shap):
+        if data[num-new, 1]-data[num-new-1, 1] == 1:
+            count = count + 1
+            filledin[num, :] = data[num-new, :]
+        elif data[num - new, 1]-data[num - new - 1, 1] > 1:
+            new = new + 1
+            iba = int(data[num - new+1, 1]-data[num - new, 1])
+            togoin = data[num - new]
+            togoin[1] = togoin[1] + 1
+            filledin[num, :] = togoin
+            # dataset[2] = np.insert(dataset[2], [num + new - 2], togoin, axis=0)
+
+        else:
+            other = other + 1
+        tot = count + new + other
+
+    return filledin
+
+
+def prettify(traj, cut, lim, umppx, fps):
+    """
+    This function takes a trajectory dataset that has been extracted from a csv file from the MOSAIC code and augments
+    it by calculating MSDs and Deffs and putting those in new columns.  The final output looks like this:
+
+    Output:
+    0 particle number
+    1 frames
+    2 x coordinate
+    3 y coordinate
+    4 z coordinate
+    5 centered x coordinate
+    6 centered y coordinate
+    7 centered z coordinate
+    8 3D MSD
+    9 2D xy MSD
+    10 2D xz MSD
+    11 2D yz MSD
+    12 1D x MSD
+    13 1D y MSD
+    14 1D z MSD
+    15 time
+    16 3D Deff
+    17 2D xy Deff
+    18 2D xz Deff
+    19 2D yz Deff
+    20 1D x Deff
+    21 1D y Deff
+    22 1D z Deff
+
+    New functionality to this code includes user inputs to define um/px defined by the microscope settings to
+    convert from pixels to ums.
+
+    traj: a dataset from the MOSAIC code with the top row and first column removed.
+    cut: the minimum number of frames required to be included in final dataset
+    lim: the specified number of frames to be included in final dataset (often the same as cut)
+    fps: frames per second
+    umppx: microns per pixel
+    """
+
+    dataset = dict()
+
+    particles = traj[:, 0]
+    total = int(max(particles))
+    total1 = total + 1
+    rawdataset = traj[:, :]
+    rawdataset[:, 2:5] = umppx * rawdataset[:, 2:5]
+
+    # Creates an array for each trajectory containing all xyz data
+    for num in range(1, total1):
+
+        hold = np.where(particles == num)
+        itindex = hold[0]
+        min1 = min(itindex)
+        max1 = max(itindex)
+        dataset[num] = (rawdataset[min1:max1, 0:5])
+
+    flee = dict()
+    for num in range(1, total1):
+        flee[num] = fillin(dataset[num])
+
+        xmax = max(flee[num][:, 2])
+        xmin = min(flee[num][:, 2])
+        ymax = max(flee[num][:, 3])
+        ymin = min(flee[num][:, 3])
+        zmax = max(flee[num][:, 4])
+        zmin = min(flee[num][:, 4])
+
+        xc = np.array([flee[num][:, 2] - ((xmax+xmin)/2)])
+        yc = np.array([flee[num][:, 3] - ((ymax+ymin)/2)])
+        zc = np.array([flee[num][:, 4] - ((zmax+zmin)/2)])
+
+        xstart = xc[0, 0]
+        ystart = yc[0, 0]
+        zstart = zc[0, 0]
+
+        flee[num] = np.append(flee[num], xc.T, axis=1)
+        flee[num] = np.append(flee[num], yc.T, axis=1)
+        flee[num] = np.append(flee[num], zc.T, axis=1)
+
+        the = flee[num].shape[0]
+        MSD3 = np.zeros((the, 1))
+        M2xy = np.zeros((the, 1))
+        M2xz = np.zeros((the, 1))
+        M2yz = np.zeros((the, 1))
+        M1x = np.zeros((the, 1))
+        M1y = np.zeros((the, 1))
+        M1z = np.zeros((the, 1))
+
+        # This defines the units of time.  This is more approrpriately an input to the function.  Will fix.
+        time = (1/fps) * flee[num][:, 1]
+        time[0] = 0.0000000001
+        time1 = np.array([time]).T
+
+        D3 = np.zeros((the, 1))
+        D2xy = np.zeros((the, 1))
+        D2xz = np.zeros((the, 1))
+        D2yz = np.zeros((the, 1))
+        D1x = np.zeros((the, 1))
+        D1y = np.zeros((the, 1))
+        D1z = np.zeros((the, 1))
+
+        for bum in range(0, the):
+            MSD3[bum, 0] = (xc[0, bum] - xstart)**2 + (yc[0, bum] - ystart)**2 + (zc[0, bum] - zstart)**2
+            M2xy[bum, 0] = (xc[0, bum] - xstart)**2 + (yc[0, bum] - ystart)**2
+            M2xz[bum, 0] = (xc[0, bum] - xstart)**2 + (zc[0, bum] - zstart)**2
+            M2yz[bum, 0] = (yc[0, bum] - ystart)**2 + (zc[0, bum] - zstart)**2
+            M1x[bum, 0] = (xc[0, bum] - xstart)**2
+            M1y[bum, 0] = (yc[0, bum] - ystart)**2
+            M1z[bum, 0] = (zc[0, bum] - zstart)**2
+
+            D3[bum, 0] = MSD3[bum, 0]/(6*time[bum])
+            D2xy[bum, 0] = M2xy[bum, 0]/(4*time[bum])
+            D2xz[bum, 0] = M2xz[bum, 0]/(4*time[bum])
+            D2yz[bum, 0] = M2yz[bum, 0]/(4*time[bum])
+            D1x[bum, 0] = M1x[bum, 0]/(2*time[bum])
+            D1y[bum, 0] = M1y[bum, 0]/(2*time[bum])
+            D1z[bum, 0] = M1z[bum, 0]/(2*time[bum])
+
+        flee[num] = np.append(flee[num], MSD3, axis=1)
+        flee[num] = np.append(flee[num], M2xy, axis=1)
+        flee[num] = np.append(flee[num], M2xz, axis=1)
+        flee[num] = np.append(flee[num], M2yz, axis=1)
+        flee[num] = np.append(flee[num], M1x, axis=1)
+        flee[num] = np.append(flee[num], M1y, axis=1)
+        flee[num] = np.append(flee[num], M1z, axis=1)
+        flee[num] = np.append(flee[num], time1, axis=1)
+        flee[num] = np.append(flee[num], D3, axis=1)
+        flee[num] = np.append(flee[num], D2xy, axis=1)
+        flee[num] = np.append(flee[num], D2xz, axis=1)
+        flee[num] = np.append(flee[num], D2yz, axis=1)
+        flee[num] = np.append(flee[num], D1x, axis=1)
+        flee[num] = np.append(flee[num], D1y, axis=1)
+        flee[num] = np.append(flee[num], D1z, axis=1)
+
+    teancum = dict()
+    fifties = 0
+    nones = 0
+    cutoff = cut
+
+    for num in range(1, total1):
+        if flee[num].shape[0] < cutoff:
+            nones = nones + 1
+        else:
+            fifties = fifties + 1
+            teancum[num - nones] = flee[num]
+            # I must also redefine the particle numbers to reflect the new set.
+            teancum[num - nones][:, 0] = fifties
+
+    moroni = dict()
+    limit = lim
+
+    for num in range(1, fifties):
+        moroni[num] = teancum[num][0:limit, :]
+
+    fifties = fifties - 1
+
+    return (moroni, fifties)
