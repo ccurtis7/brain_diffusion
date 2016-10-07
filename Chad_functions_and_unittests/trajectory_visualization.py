@@ -589,7 +589,7 @@ def plot_3Doverlay(traj, n1, n2, dec, filename, xr, yr, zr):
                  ax.get_xticklabels() + ax.get_yticklabels() + ax.get_zticklabels()):
         item.set_fontsize(30)
 
-    plt.yticks(rotation=45)
+    plt.xticks(rotation=45)
 
     ax.title.set_fontsize(35)
     ax.tick_params(direction='out', pad=32)
