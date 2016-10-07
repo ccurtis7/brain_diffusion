@@ -577,7 +577,7 @@ def plot_3Doverlay(traj, n1, n2, dec, filename, xr, yr, zr):
     # Plots individual trajectories
     for num in range(1, total1):
 
-        ax.plot(path[num][:, 0], path[num][:, 1], path[num][:, 2], label='Particle {}'.format(num))
+        ax.plot(path[num][:, 0], path[num][:, 1], path[num][:, 2], label='Particle {}'.format(num), linewidth=3)
 
     axbox = ax.get_position()
     # ax.legend(loc=(0.86, 0.90), prop={'size': 20})
@@ -587,10 +587,10 @@ def plot_3Doverlay(traj, n1, n2, dec, filename, xr, yr, zr):
     # A few adjustments to prettify the graph
     for item in ([ax.xaxis.label, ax.yaxis.label, ax.zaxis.label] +
                  ax.get_xticklabels() + ax.get_yticklabels() + ax.get_zticklabels()):
-        item.set_fontsize(16)
+        item.set_fontsize(50)
 
     ax.title.set_fontsize(35)
-    ax.tick_params(direction='out', pad=16)
+    ax.tick_params(direction='out', pad=32)
     plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
     plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
     plt.gca().zaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
