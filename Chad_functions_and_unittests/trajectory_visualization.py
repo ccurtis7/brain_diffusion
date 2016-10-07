@@ -589,10 +589,10 @@ def plot_3Doverlay(traj, n1, n2, dec, filename, xr, yr, zr):
                  ax.get_xticklabels() + ax.get_yticklabels() + ax.get_zticklabels()):
         item.set_fontsize(30)
 
-    plt.xticks(rotation=45)
+    plt.xticks(rotation=-45)
 
     ax.title.set_fontsize(35)
-    ax.tick_params(direction='out', pad=32)
+    ax.tick_params(direction='out', pad=16)
     plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
     plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
     plt.gca().zaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f um'.format(dec)))
