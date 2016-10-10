@@ -930,7 +930,7 @@ def multrandtraj(b, s, f, p):
     return one
 
 
-def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec1, dec2, datatype, filename, limit1, limit2):
+def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec1, dec2, datatype, filename, limit1, limit2, tick1, tick2):
     """
     Plots the MSDs or Deffs from a trajectory dataset.
 
@@ -978,8 +978,8 @@ def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec1, dec2, datatype, filename, limi
                  ax.get_xticklabels() + ax.get_yticklabels()):
         item.set_fontsize(70)
 
-    xmajor_ticks = np.arange(0, limit1, 4)
-    ymajor_ticks = np.arange(0, limit2, 4)
+    xmajor_ticks = np.arange(0, limit1, tick1)
+    ymajor_ticks = np.arange(0, limit2, tick2)
 
     ax.set_xticks(xmajor_ticks)
     ax.set_yticks(ymajor_ticks)
