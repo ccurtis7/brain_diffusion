@@ -976,13 +976,13 @@ def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec1, dec2, datatype, filename, limi
     # A few adjustments to prettify the graph
     for item in ([ax.xaxis.label, ax.yaxis.label] +
                  ax.get_xticklabels() + ax.get_yticklabels()):
-        item.set_fontsize(60)
+        item.set_fontsize(70)
 
     ax.title.set_fontsize(70)
-    ax.set_xlabel('Time (s)', fontsize=85)
-    ax.set_ylabel(datatype, fontsize=85)
+    ax.set_xlabel('Time (s)', fontsize=95)
+    ax.set_ylabel(datatype, fontsize=95)
     ax.tick_params(direction='out', pad=16)
-    ax.legend(loc=(0.70, 0.05), prop={'size': 60})
+    ax.legend(loc=(0.65, 0.05), prop={'size': 70})
     plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec1)))
     plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec2)))
 
