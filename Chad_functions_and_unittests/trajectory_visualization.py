@@ -570,7 +570,7 @@ def plot_3Doverlay(traj, n1, n2, dec, filename, xr, yr, zr):
         path[num] = (position[min1:max1, :])
 
     # Creates figure
-    fig = plt.figure(figsize=(24, 18), dpi=80)
+    fig = plt.figure(figsize=(24, 20), dpi=80)
     ax = fig.add_subplot(111, projection='3d')
     # ax.set_title('Particle Trajectories', x=0.5, y=1.15)
 
@@ -589,7 +589,7 @@ def plot_3Doverlay(traj, n1, n2, dec, filename, xr, yr, zr):
                  ax.get_xticklabels() + ax.get_yticklabels() + ax.get_zticklabels()):
         item.set_fontsize(30)
 
-    plt.xticks(rotation=-45)
+    plt.xticks(rotation=-30)
 
     ax.title.set_fontsize(35)
     ax.tick_params(direction='out', pad=16)
