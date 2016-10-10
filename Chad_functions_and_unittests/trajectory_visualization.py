@@ -978,6 +978,11 @@ def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec1, dec2, datatype, filename, limi
                  ax.get_xticklabels() + ax.get_yticklabels()):
         item.set_fontsize(70)
 
+    xmajor_ticks = np.arange(0, limit1, 4)
+    ymajor_ticks = np.arange(0, limit2, 4)
+
+    ax.set_xticks(xmajor_ticks)
+    ax.set_yticks(ymajor_ticks)
     ax.title.set_fontsize(70)
     ax.set_xlabel('Time (s)', fontsize=95)
     ax.set_ylabel(datatype, fontsize=95)
@@ -987,7 +992,7 @@ def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec1, dec2, datatype, filename, limi
     plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec2)))
 
     # plt.gca().set_xlim([-limit, limit])
-    plt.gca().set_ylim([limit1, limit2])
+    # plt.gca().set_ylim([limit1, limit2])
 
     # Save your figure
     plt.savefig('{}.png'.format(filename), bbox_inches='tight')
