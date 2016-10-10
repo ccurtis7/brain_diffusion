@@ -587,7 +587,7 @@ def plot_3Doverlay(traj, n1, n2, dec, filename, xr, yr, zr):
     # A few adjustments to prettify the graph
     for item in ([ax.xaxis.label, ax.yaxis.label, ax.zaxis.label] +
                  ax.get_xticklabels() + ax.get_yticklabels() + ax.get_zticklabels()):
-        item.set_fontsize(30)
+        item.set_fontsize(32)
 
     plt.xticks(rotation=-30)
 
@@ -976,13 +976,13 @@ def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec, datatype, filename, limit1, lim
     # A few adjustments to prettify the graph
     for item in ([ax.xaxis.label, ax.yaxis.label] +
                  ax.get_xticklabels() + ax.get_yticklabels()):
-        item.set_fontsize(36)
+        item.set_fontsize(40)
 
     ax.title.set_fontsize(45)
-    ax.set_xlabel('Time (s)')
-    ax.set_ylabel(datatype)
+    ax.set_xlabel('Time (s)', fontsize=40)
+    ax.set_ylabel(datatype, fontsize=40)
     ax.tick_params(direction='out', pad=16)
-    ax.legend(loc=(0.80, 0.10), prop={'size': 35})
+    ax.legend(loc=(0.80, 0.10), prop={'size': 40})
     plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
     plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
 
