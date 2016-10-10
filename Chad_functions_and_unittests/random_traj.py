@@ -527,7 +527,8 @@ def randsamp(b, s, f, p, samp):
     Deffxz = ttraject[:, 17]
     Deffyz = ttraject[:, 18]
 
-    ttraject2 = ttraject[0::samp, :]
+    ttraject2a = ttraject[0::samp, :]
+    ttraject2 = np.vstack([ttraject2a, ttraject[-1, :]])
 
     return ttraject2
 
