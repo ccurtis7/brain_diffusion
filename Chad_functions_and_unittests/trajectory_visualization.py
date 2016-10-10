@@ -968,10 +968,10 @@ def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec, datatype, filename, limit1, lim
     ax = fig.add_subplot(111)
     # ax.set_title('Particle Trajectories', x=0.5, y=1.15)
 
-    ax.plot(time[1][:], MMSD[:, 0], linewidth=4, label='3D')
-    ax.plot(time[1][:], MMSD[:, 1], linewidth=4, label='2D xy')
-    ax.plot(time[1][:], MMSD[:, 2], linewidth=4, label='2D xz')
-    ax.plot(time[1][:], MMSD[:, 3], linewidth=4, label='2D yz')
+    ax.plot(time[1][:], MMSD[:, 0], linewidth=6, label='3D')
+    ax.plot(time[1][:], MMSD[:, 1], linewidth=6, label='2D xy')
+    ax.plot(time[1][:], MMSD[:, 2], linewidth=6, label='2D xz')
+    ax.plot(time[1][:], MMSD[:, 3], linewidth=6, label='2D yz')
 
     # A few adjustments to prettify the graph
     for item in ([ax.xaxis.label, ax.yaxis.label] +
@@ -979,10 +979,10 @@ def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec, datatype, filename, limit1, lim
         item.set_fontsize(60)
 
     ax.title.set_fontsize(70)
-    ax.set_xlabel('Time (s)', fontsize=70)
-    ax.set_ylabel(datatype, fontsize=70)
+    ax.set_xlabel('Time (s)', fontsize=85)
+    ax.set_ylabel(datatype, fontsize=85)
     ax.tick_params(direction='out', pad=16)
-    ax.legend(loc=(0.80, 0.10), prop={'size': 60})
+    ax.legend(loc=(0.70, 0.05), prop={'size': 60})
     plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
     plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
 
