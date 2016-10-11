@@ -991,8 +991,8 @@ def plot_Mean2DMSDsorDeff(traj, n1, n2, n3, dec1, dec2, datatype, filename, limi
     plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec1)))
     plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec2)))
 
-    # plt.gca().set_xlim([-limit, limit])
-    # plt.gca().set_ylim([limit1, limit2])
+    plt.gca().set_xlim([0, limit1])
+    plt.gca().set_ylim([0, limit2])
 
     # Save your figure
     plt.savefig('{}.png'.format(filename), bbox_inches='tight')
