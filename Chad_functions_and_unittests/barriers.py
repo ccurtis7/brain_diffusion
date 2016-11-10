@@ -255,7 +255,7 @@ def rand2planes(b, s, f, p, pnor1, ppoi1, pnor2, ppoi2):
         test5 = np.dot(nor1, p1) > np.dot(nor1, poi1)
         test6 = test4 == test5
 
-        if test3 is False and test6 is False:
+        if test3 == False and test6 == False:
             (g, h) = inter2planes(nor, poi, nor1, poi1)
             point = (intersection(p0, p1, nor, poi) + intersection(p0, p1, nor1, poi1))/2
             onpoint = linepoint(g, h, point)
@@ -263,14 +263,14 @@ def rand2planes(b, s, f, p, pnor1, ppoi1, pnor2, ppoi2):
             ttraject[num, 6] = 0.95*onpoint[1]
             ttraject[num, 7] = 0.95*onpoint[2]
 
-        elif test3 is False:
+        elif test3 == False:
             # In this case, the trajectories remain unmodified
             newp = reflect(p0, p1, nor, poi)
             ttraject[num, 5] = newp[0]
             ttraject[num, 6] = newp[1]
             ttraject[num, 7] = newp[2]
 
-        elif test6 is False:
+        elif test6 == False:
             newp1 = reflect(p0, p1, nor1, poi1)
             ttraject[num, 5] = newp1[0]
             ttraject[num, 6] = newp1[1]
