@@ -85,7 +85,7 @@ def randplane(b, s, f, p, pnor, ppoi):
         test2 = np.dot(nor, p1) > np.dot(nor, poi)
         test3 = test2 == test1
 
-        if test3 is True:
+        if test3 == True:
             # In this case, the trajectories remain unmodified
             tor = 1
         else:
