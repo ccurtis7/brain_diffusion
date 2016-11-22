@@ -1197,7 +1197,7 @@ def fillin(data):
     return filledin
 
 
-def prettify(traj, cut, lim, umppx, fps):
+def prettify(traj, cut, lim, umppx, fps, umps):
     """
     This function takes a trajectory dataset that has been extracted from a csv file from the MOSAIC code and augments
     it by calculating MSDs and Deffs and putting those in new columns.  The final output looks like this:
@@ -1235,6 +1235,7 @@ def prettify(traj, cut, lim, umppx, fps):
     lim: the specified number of frames to be included in final dataset (often the same as cut)
     fps: frames per second
     umppx: microns per pixel
+    umps: microns per slice (for 3D datasets, set to 1 otherwise)
     """
 
     dataset = dict()
@@ -1243,7 +1244,8 @@ def prettify(traj, cut, lim, umppx, fps):
     total = int(max(particles))
     total1 = total + 1
     rawdataset = traj[:, :]
-    rawdataset[:, 2:5] = umppx * rawdataset[:, 2:5]
+    rawdataset[:, 2:4] = umppx * rawdataset[:, 2:4]
+    rawdataset[:, 4] = umps * rawdataset[:, 4]
 
     # Creates an array for each trajectory containing all xyz data
     for num in range(1, total1):
