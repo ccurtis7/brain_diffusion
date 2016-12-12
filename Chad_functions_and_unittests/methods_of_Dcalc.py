@@ -305,8 +305,8 @@ def Dpointder3D(traj, n1, n2, n3, tn, nD):
         itindex = hold[0]
         min1 = min(itindex)
         max1 = max(itindex)
-        MSD[num] = (raw3DMSDs[min1+2:max1, :])
-        time[num] = (rawtime[min1+2:max1])
+        MSD[num] = (raw3DMSDs[min1+1:max1, :])
+        time[num] = (rawtime[min1+1:max1])
 
     MMSD = MSD[1]
     for num in range(2, total1):
