@@ -1334,9 +1334,9 @@ def prettify(traj, cut, lim, umppx, fps, umps):
         flee[num] = np.append(flee[num], D1y, axis=1)
         flee[num] = np.append(flee[num], D1z, axis=1)
 
-    teancum = dict()
-    fifties = 0
-    nones = 0
+        teancum = dict()
+        fifties = 0
+        nones = 0
     cutoff = cut
 
     for num in range(1, total1):
