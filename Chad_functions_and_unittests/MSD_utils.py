@@ -88,3 +88,10 @@ def return_average(data, frames, to_average='YG_nPEG_in_agarose_1x'):
     answer = np.mean(to_avg_num, axis=1)
 
     return answer
+
+
+def avg_all(data, frames, avg_sets):
+    all_avg = {}
+    for keys in avg_sets:
+        all_avg[avg_sets[keys]] = return_average(data, frames, avg_sets[keys])
+    return all_avg
