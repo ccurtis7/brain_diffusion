@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def get_data(channels, surface_functionalities, media, concentrations, replicates, path):
+def get_data_gels(channels, surface_functionalities, media, concentrations, replicates, path):
 
     """
     Loads data from csv files and outputs a dictionary following a specified
@@ -91,7 +91,59 @@ def return_average(data, frames, to_average='YG_nPEG_in_agarose_1x'):
 
 
 def avg_all(data, frames, avg_sets):
+    """
+    Averages over all replicates in a dataset.
+
+    data is a dictionary defined in function get_data.
+    frames is the number of frames in each experiment.
+    avg_sets is a dictionary of strings (keys are 0-N)
+
+    Example:
+    avg_all(data, 90, {0: 'RED_PEG_in_agarose_0_1x', 1: 'RED_PEG_in_agarose_1x'})
+    """
+
     all_avg = {}
     for keys in avg_sets:
         all_avg[avg_sets[keys]] = return_average(data, frames, avg_sets[keys])
     return all_avg
+
+
+def get_data_pups(channels, genotypes, pups, surface_functionalities, slices, regions, replicates, path):
+
+    """
+    Loads data from csv files and outputs a dictionary following a specified
+        sample naming convection determined by the input
+
+    Parameters:
+    channels, surface functionalities, media, and concentrations, and replicates
+        can take ranges or lists.
+    path is string with substition placeholders for concentration and sample
+        name (built from channels, surface_functionalities, media,
+        concentrations, and replicates).
+
+    Example:
+    path = "./{genotype}/{pup}/{region}/{channel}/geoM2xy_{sample_name}.csv";
+    get_data(["RED", "YG"], ["WT", "KO", "HET"], ["P1", "P2", "P3", "P4"],
+    ["PEG", "noPEG"], ["S1", "S2", "S3", "S4"], ["cortex", "hipp", "mid"],
+    [1, 2, 3, 4, 5], path)
+    """
+
+    data = {}
+    avg_sets = {}
+    counter = 0
+
+    for channel in channels:
+        for genotype in genotypes:
+            for pup in pups:
+                for surface_functionality in surface_functionalities:
+                    for slic in slices:
+                        for region in regions:
+                            test_value = "{}_{}_{}_{}_{}_{}".format(channel, genotype, pup, surface_functionality, slic, region)
+                            avg_sets[counter] = test_value
+                            counter = counter + 1
+                            for replicate in replicates:
+                                sample_name = "{}_{}_{}_{}_{}_{}_{}".format(channel, genotype, pup, surface_functionality, slic, region, replicate)
+                                filename = path.format(channel=channel, genotype=genotype, pup=pup, region=region, sample_name=sample_name)
+                        data[sample_name] = np.genfromtxt(filename, delimiter=",")
+
+    return data, avg_sets
