@@ -62,7 +62,7 @@ def build_time_array(frames=90, conversion=(0.16, 9.89, 1), SD_frames=[1, 7, 14]
     return time, time_SD
 
 
-def return_average(to_average='YG_nPEG_in_agarose_1x', data):
+def return_average(data, to_average='YG_nPEG_in_agarose_1x'):
     """
     Averages over replicates within a sample.
 
