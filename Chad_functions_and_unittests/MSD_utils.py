@@ -62,7 +62,7 @@ def build_time_array(frames=90, conversion=(0.16, 9.89, 1), SD_frames=[1, 7, 14]
     return time, time_SD
 
 
-def return_average(to_average='YG_nPEG_in_agarose_1x'):
+def return_average(to_average='YG_nPEG_in_agarose_1x', data):
     """
     Averages over replicates within a sample.
 
@@ -80,7 +80,7 @@ def return_average(to_average='YG_nPEG_in_agarose_1x'):
             to_avg[counter] = keys
             counter = counter + 1
 
-    to_avg_num = np.zeros((frames, counter))    
+    to_avg_num = np.zeros((frames, counter))
     for i in range(0, counter):
         for j in range(0, frames):
             to_avg_num[j, i] = data[to_avg[i]][j]
