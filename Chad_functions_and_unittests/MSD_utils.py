@@ -147,3 +147,50 @@ def get_data_pups(channels, genotypes, pups, surface_functionalities, slices, re
                         data[sample_name] = np.genfromtxt(filename, delimiter=",")
 
     return data, avg_sets
+
+
+def return_SD(data, frames=90, SD_frames=[1, 7, 14, 15], to_stdev='YG_nPEG_in_agarose_1x'):
+    """
+    Finds standard deviation over replicates within a sample at frames specified by SD_frames.
+
+    Parameters:
+    to_average is a string.
+
+    Example:
+    return_SD(data, 90, [1, 7, 14, 15], 'RED_PEG_in_agarose_10x')
+    """
+
+    to_SD = {}
+    counter = 0
+    for keys in data:
+        if to_stdev in keys:
+            to_SD[counter] = keys
+            counter = counter + 1
+
+    to_SD_num = np.zeros((frames, counter))
+    for i in range(0, counter):
+        for j in range(0, frames):
+            to_SD_num[j, i] = data[to_SD[i]][j]
+
+    answer = np.std(to_SD_num, axis=1)
+    answer_sep = answer[SD_frames[:]]
+
+    return answer_sep
+
+
+def SD_all(data, frames, SD_frames, avg_sets):
+    """
+    Finds standard deviations over all replicates in a dataset.
+
+    data is a dictionary defined in function get_data.
+    frames is the number of frames in each experiment.
+    avg_sets is a dictionary of strings (keys are 0-N)
+
+    Example:
+    SD_all(data, 90, [1, 7, 14, 15], {0: 'RED_PEG_in_agarose_0_1x', 1: 'RED_PEG_in_agarose_1x'})
+    """
+
+    all_SD = {}
+    for keys in avg_sets:
+        all_SD[avg_sets[keys]] = return_SD(data, frames, SD_frames, avg_sets[keys])
+    return all_SD
