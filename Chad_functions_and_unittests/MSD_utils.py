@@ -138,11 +138,11 @@ def get_data_pups(channels, genotypes, pups, surface_functionalities, slices, re
                 for surface_functionality in surface_functionalities:
                     for slic in slices:
                         for region in regions:
-                            test_value = "{}_{}_{}_{}_{}_{}".format(channel, genotype, pup, surface_functionality, slic, region)
+                            test_value = "{}_{}_{}_{}_{}_{}".format(channel, genotype, surface_functionality, pup, slic, region)
                             avg_sets[counter] = test_value
                             counter = counter + 1
                             for replicate in replicates:
-                                sample_name = "{}_{}_{}_{}_{}_{}_{}".format(channel, genotype, pup, surface_functionality, slic, region, replicate)
+                                sample_name = "{}_{}_{}_{}_{}_{}_{}".format(channel, genotype, surface_functionality, pup, slic, region, replicate)
                                 filename = path.format(channel=channel, genotype=genotype, pup=pup, region=region, sample_name=sample_name)
                         data[sample_name] = np.genfromtxt(filename, delimiter=",")
 
