@@ -129,25 +129,43 @@ def get_data_pups(channels, genotypes, pups, surface_functionalities, slices, re
     """
 
     data = {}
-    avg_sets = {}
+    avg_over_slices_raw = {}
+    avg_over_pups_raw = {}
     counter = 0
 
     for channel in channels:
         for genotype in genotypes:
-            for pup in pups:
-                for surface_functionality in surface_functionalities:
-                    for slic in slices:
-                        for region in regions:
-                            test_value = "{}_{}_{}_{}_{}_{}".format(channel, genotype, surface_functionality, pup, slic, region)
-                            avg_sets[counter] = test_value
+            for surface_functionality in surface_functionalities:
+                for region in regions:
+                    for pup in pups:
+                        for slic in slices:
+                            test_value = "{}_{}_{}_{}_{}".format(channel, genotype, surface_functionality, region, pup)
+                            avg_over_slices_raw[counter] = test_value
+                            test_value2 = "{}_{}_{}_{}".format(channel, genotype, surface_functionality, region)
+                            avg_over_pups_raw[counter] = test_value2
                             counter = counter + 1
-                            sample_name = "{}_{}_{}_{}_{}_{}".format(channel, genotype, surface_functionality, pup, slic, region)
+                            sample_name = "{}_{}_{}_{}_{}_{}".format(channel, genotype, surface_functionality, region, pup, slic)
                             # for replicate in replicates:
                             #     sample_name = "{}_{}_{}_{}_{}_{}_{}".format(channel, genotype, surface_functionality, pup, slic, region, replicate)
                             filename = path.format(channel=channel, genotype=genotype, pup=pup, region=region, sample_name=sample_name)
-                        data[sample_name] = np.genfromtxt(filename, delimiter=",")
+                            data[sample_name] = np.genfromtxt(filename, delimiter=",")
 
-    return data, avg_sets
+    avg_over_slices = {}
+    avg_over_pups = {}
+
+    counter = 0
+    for key, value in avg_over_slices_raw.items():
+        if value not in avg_over_slices.values():
+            avg_over_slices[counter] = value
+            counter = counter + 1
+
+    counter = 0
+    for key, value in avg_over_pups_raw.items():
+        if value not in avg_over_pups.values():
+            avg_over_pups[counter] = value
+            counter = counter + 1
+
+    return data, avg_over_slices, avg_over_pups
 
 
 def return_SD(data, frames=90, SD_frames=[1, 7, 14, 15], to_stdev='YG_nPEG_in_agarose_1x'):
