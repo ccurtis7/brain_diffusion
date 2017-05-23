@@ -194,3 +194,121 @@ def SD_all(data, frames, SD_frames, avg_sets):
     for keys in avg_sets:
         all_SD[avg_sets[keys]] = return_SD(data, frames, SD_frames, avg_sets[keys])
     return all_SD
+
+
+def range_and_ticks(range_to_graph, to_frame, manual_decimals=False,
+                    manual_decimals_val=2):
+    """
+    This is a useful function that calculates the best range, tick mark interval
+    size, and decimals displayed for a given input dataset.
+
+    Inputs:
+    range_to_graph: numpy array of data to be graphed.
+    to_frame: integer, limits data to be graphed to the range [0, to_frame].
+    manual_decimals: True/False.  Allow the user to manually adjust the number of decimals displayed.
+    manual_decimals_val: integer.  Number of decimals the user desires.
+
+    Outputs:
+    y_range: upper boundary containing the entire range of range_to_graph[0, to_frame].
+    ticks: tick interval.
+    decimals: number of decimals to display.
+
+    This function must be modified if I need to plot graphs with negative values.
+    I should also include symmetrical capabilities when I want to plot negative values.
+    """
+
+    graph_max = np.nanmax(range_to_graph[0:to_frame])  # Define max within range
+
+    if np.ceil(np.log10(graph_max)) >= 0:  # Find nearest 10^x that contains graph_max
+        base = np.ceil(np.log10(graph_max))
+        raw_max = 10**base
+        decimals = int(1)
+    else:
+        base = np.ceil(np.log10(1/graph_max))
+        raw_max = 10**(-base)
+        decimals = int(base + 1)
+
+    range_correct = False
+    cut_down_max = 0.1*raw_max
+    counter = -1
+    while range_correct is False:  # Make sure that most of the graph space is used efficiently (75%).
+        if graph_max/raw_max > 0.75:
+            y_range = raw_max
+            range_correct = True
+        else:
+            raw_max = raw_max - cut_down_max
+            range_correct = False
+        counter = counter + 1
+
+    if graph_max > y_range:  # Make sure that graph_max doesn't exceed limits
+        y_range = y_range + cut_down_max
+
+    if counter % 2 == 0:  # Define tick size. I based it off of 0.1*raw_max, which is always a 10^x
+        ticks = cut_down_max * 2
+    else:
+        ticks = cut_down_max
+
+    range_correct = False  # Modifies the tick size if there aren't enough ticks on the graph.
+    while range_correct is False:
+        if ticks/y_range >= 0.24:
+            ticks = ticks/2
+            range_correct = False
+        else:
+            range_correct = True
+
+    if manual_decimals:  # Allow user to set manual decimal values.
+        decimals = manual_decimals_val
+
+    return y_range, ticks, decimals
+
+
+def choose_y_axis_params(all_avg, in_name1, in_name2, to_frame):
+    """
+    When plotting multiple trajectories, I need to choose plot parameters based
+    on multiple datasets.  This function uses the function ranges_and_ticks to
+    choose the best parameters based on multiple trajectories.
+
+    Inputs:
+    all_avg: dictionary of numpy arrays.  A subset of this data will be plotted
+        based on the parameters in_name1 and in_name2.
+    in_name1: string.  in_name1 should be found within the keys in all_avg of
+        all datasets to be plotted e.g. if I want to plot all RED datasets, the
+        I could use in_name1=RED.
+    in_name2: similar criteria to in_name1.  If I want to narrow the data to be
+        plotted to PEG datasets, then, in_name2 could be "_PEG" (if you only use
+        PEG, it will plot all nPEG and PEG datasets, due to my chosen
+        nomenclature. Just be aware of your naming system).
+    to_frame: integer, limits data to be graphed to the range [0, to_frame].
+
+    Outputs:
+    y_range_final: upper boundary containing the entire range of
+        range_to_graph[0, to_frame].
+    ticks_final: tick interval.
+    decimals_final: number of decimals to display.
+
+    Example:
+    choose_y_axis_params(all_avg, "RED", "_PEG", 15)
+    """
+
+    to_graph = {}
+    counter = 0
+
+    for keys in all_avg:
+        if in_name1 in keys and in_name2 in keys:
+            to_graph[counter] = keys
+            counter = counter + 1
+
+    y_range = np.zeros(counter)
+    ticks = np.zeros(counter)
+    decimals = np.zeros(counter)
+    base = np.zeros(counter)
+
+    for keys in to_graph:
+        y_range[keys], ticks[keys], decimals[keys] = range_and_ticks(all_avg[to_graph[keys]], to_frame)
+
+    one_to_graph = np.argmax(y_range)
+    y_range_final = y_range[one_to_graph]
+    ticks_final = ticks[one_to_graph]
+    decimals_final = int(decimals[one_to_graph])
+
+    return y_range_final, ticks_final, decimals_final
