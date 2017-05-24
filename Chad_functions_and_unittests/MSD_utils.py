@@ -593,7 +593,7 @@ def fill_in_and_split(data):
     return particles_new, framed_new, x_data_new, y_data_new
 
 
-def plot_traj_length_histogram(length, total, filename):
+def plot_traj_length_histogram(length, total, lenplot):
 
     total1 = total
     hist = length
@@ -606,7 +606,7 @@ def plot_traj_length_histogram(length, total, filename):
     plt.bar(center, plot, align='center', width=width)
     plt.xlabel('Trajectory lengths', fontsize=20)
 
-    plt.savefig('{}.png'.format(filename), bbox_inches='tight')
+    plt.savefig('{}.png'.format(lenplot), bbox_inches='tight')
     return hist, total1
 
 
