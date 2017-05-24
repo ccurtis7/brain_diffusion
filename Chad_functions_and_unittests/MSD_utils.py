@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import numpy.ma as ma
 
 
 def get_data_gels(channels, surface_functionalities, media, concentrations, replicates, path):
