@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
+
 def get_data_gels(channels, surface_functionalities, media, concentrations, replicates, path):
 
     """
@@ -514,3 +515,151 @@ def graph_single_variable(all_avg, all_SD, time, time_SD, SD_frames, in_name1, i
     # Save your figure
     plt.savefig('{}'.format(filename), bbox_inches='tight')
     return y_range, ticks_y, dec_y, x_range, ticks_x, dec_x
+
+
+def fill_in_and_split(data):
+    """
+    This function takes a raw trajectory datafile (with the first column deleted),
+    splits it into particles, frames, x data, and y data arrays, and fills in
+    any skipped frames.
+
+    Inputs:
+    data: array.  First column are particle numbers, second frames, third x data,
+        forth, y data.
+
+    Outputs:
+    particles_new
+    framed_new
+    x_data_new
+    y_data_new
+    """
+
+    particles = data[:, 0]
+    framed = data[:, 1].astype(np.int64)
+    x_data = data[:, 2]
+    y_data = data[:, 3]
+
+    counter = 0
+    original_size = framed.size
+
+    for num in range(0, original_size - 1):
+        if framed[num+1] > framed[num] and particles[num+1] == particles[num]:
+            if not framed[num+1] - framed[num] == 1:
+                new_frames = framed[num+1] - framed[num] - 1
+                counter = counter + new_frames
+
+    new_size = original_size + counter
+
+    if not counter == 0:
+        particles_new = np.zeros(new_size)
+        framed_new = np.zeros(new_size)
+        x_data_new = np.zeros(new_size)
+        y_data_new = np.zeros(new_size)
+
+        counter2 = 0
+
+        for num in range(0, original_size - 1):
+            if framed[num+1] > framed[num] and particles[num+1] == particles[num]:
+                if not framed[num+1] - framed[num] == 1:
+                    new_frames = framed[num+1] - framed[num] - 1
+                    for num2 in range(1, new_frames):
+                        particles_new[num+num2+counter2] = particles[num]
+                        framed_new[num+num2+counter2] = framed[num]
+                        x_data_new[num+num2+counter2] = x_data[num]
+                        y_data_new[num+num2+counter2] = y_data[num]
+                    counter2 = counter2 + new_frames
+                else:
+                    particles_new[num+counter2] = particles[num]
+                    framed_new[num+counter2] = framed[num]
+                    x_data_new[num+counter2] = x_data[num]
+                    y_data_new[num+counter2] = y_data[num]
+            else:
+                particles_new[num+counter2] = particles[num]
+                framed_new[num+counter2] = framed[num]
+                x_data_new[num+counter2] = x_data[num]
+                y_data_new[num+counter2] = y_data[num]
+
+        particles_new[original_size+counter2 - 1] = particles[original_size - 1]
+        framed_new[original_size+counter2 - 1] = framed[original_size - 1]
+        x_data_new[original_size+counter2 - 1] = x_data[original_size - 1]
+        y_data_new[original_size+counter2 - 1] = y_data[original_size - 1]
+    else:
+        particles_new = particles
+        framed_new = framed
+        x_data_new = x_data
+        y_data_new = y_data
+
+    return particles_new, framed_new, x_data_new, y_data_new
+
+
+def plot_traj_length_histogram(length, total, filename):
+
+    total1 = total
+    hist = length
+
+    hist = [x for x in hist if str(x) != 'nan']
+
+    plot, bins = np.histogram(hist, bins=total1)
+    width = 1 * (bins[1] - bins[0])
+    center = (bins[:-1] + bins[1:])/2
+    plt.bar(center, plot, align='center', width=width)
+    plt.xlabel('Trajectory lengths', fontsize=20)
+
+    plt.savefig('{}.png'.format(filename), bbox_inches='tight')
+    return hist, total1
+
+
+def plot_traj(xts, yts, total):
+    """
+    This function plots the trajectories of the particles as they were originally caught on the
+    microscope (no centering performed).
+
+    Inputs:
+    xts: dictionary of arrays.  Keys are the particle numbers.
+    yts: dictionary of arrays.  Keys are the particle numbers.
+    total: total particles in dictionary.
+    """
+    middle_max_x = np.zeros(total)
+    middle_max_y = np.zeros(total)
+
+    for num in range(1, total+1):
+        middle_max_x[num-1] = np.nanmax(xts[num])
+        middle_max_y[num-1] = np.nanmax(yts[num])
+
+    x_max = np.round(max(middle_max_x)/10, 0)*10+0.1
+    y_max = np.round(max(middle_max_y)/10, 0)*10+0.1
+
+    both_max = max(x_max, y_max)
+
+    # Creates figure
+    fig = plt.figure(figsize=(24, 18), dpi=80)
+    ax = fig.add_subplot(111)
+
+    for num in range(1, total+1):
+        ax.plot(xts[num], yts[num], linewidth=3, label='Particle {}'.format(num))
+
+    # A few adjustments to prettify the graph
+    for item in ([ax.xaxis.label, ax.yaxis.label] +
+                 ax.get_xticklabels() + ax.get_yticklabels()):
+        item.set_fontsize(70)
+
+    xmajor_ticks = np.arange(0, both_max, 20)
+    ymajor_ticks = np.arange(0, both_max, 20)
+
+    ax.set_xticks(xmajor_ticks)
+    ax.set_yticks(ymajor_ticks)
+    ax.title.set_fontsize(70)
+    ax.set_xlabel(r'x ($\mu$m)', fontsize=95)
+    ax.set_ylabel(r'y ($\mu$m)', fontsize=95)
+    # ax.tick_params(direction='out', pad=16)
+    # ax.legend(loc=(0.60, 0.76), prop={'size': 40})
+    plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(0)))
+    plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(0)))
+
+    # plt.yscale('log')
+    # plt.xscale('log')
+    plt.gca().set_xlim([0, both_max])
+    plt.gca().set_ylim([0, both_max])
+
+    # Save your figure
+    plt.savefig('{}.png'.format(T2plot), bbox_inches='tight')
