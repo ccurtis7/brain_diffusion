@@ -663,3 +663,62 @@ def plot_traj(xts, yts, total, T2plot):
 
     # Save your figure
     plt.savefig('{}.png'.format(T2plot), bbox_inches='tight')
+
+
+def filter_out_short_traj(particles_unfiltered, framed_unfiltered, x_data_unfiltered, y_data_unfiltered, cut):
+    """
+    Filtered out particles trajectories from a dataset that are shorter than the variable cut.
+
+    Inputs:
+    particles_unfiltered
+    framed_unfiltered
+    x_data_unfiltered
+    y_data_unfiltered
+    cut: integer.
+
+    Outputs:
+    particles_filtered
+    framed_filtered
+    x_data_filtered
+    y_data_filtered
+    """
+    total_unfiltered = int(max(particles_unfiltered))
+
+    counter = 0
+
+    for num in range(1, total_unfiltered+1):
+
+        hold = np.where(particles_unfiltered == num)
+        itindex = hold[0]
+        min1 = min(itindex)
+        max1 = max(itindex)
+
+        if max1 - min1 + 1 < cut:
+            counter = counter + max1 - min1 + 1
+
+    new_shape = particles_unfiltered.shape[0] - counter
+    particles_filtered = np.zeros(new_shape)
+    framed_filtered = np.zeros(new_shape)
+    x_data_filtered = np.zeros(new_shape)
+    y_data_filtered = np.zeros(new_shape)
+
+    counter = 0
+    counter2 = 0
+
+    for num in range(1, total_unfiltered+1):
+
+        hold = np.where(particles_unfiltered == num)
+        itindex = hold[0]
+        min1 = min(itindex)
+        max1 = max(itindex)
+
+        if max1 - min1 + 1 >= cut:
+            particles_filtered[min1 - counter:max1+1 - counter] = particles_unfiltered[min1:max1+1] - counter2
+            framed_filtered[min1 - counter:max1+1 - counter] = framed_unfiltered[min1:max1+1]
+            x_data_filtered[min1 - counter:max1+1 - counter] = x_data_unfiltered[min1:max1+1]
+            y_data_filtered[min1 - counter:max1+1 - counter] = y_data_unfiltered[min1:max1+1]
+        else:
+            counter = counter + max1 - min1 + 1
+            counter2 = counter2 + 1
+
+    return particles_filtered, framed_filtered, x_data_filtered, y_data_filtered
