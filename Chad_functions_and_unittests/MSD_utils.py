@@ -825,6 +825,7 @@ def quality_control(path2, folder, frames, conversion, parameters, cut):
     slices = parameters["slices"]
     regions = parameters["regions"]
     replicates = parameters["replicates"]
+    SD_frames = [1, 7, 14, 15]
 
     trajectory = {}
     names_with_replicates = {}
