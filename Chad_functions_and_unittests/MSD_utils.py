@@ -792,3 +792,164 @@ def plot_trajectory_overlay(x, y, graph_size, ticks, number_of_trajectories, Tpl
 
     # Save your figure
     plt.savefig('{}.png'.format(Tplot), bbox_inches='tight')
+
+
+def quality_control(path2, folder, frames, conversion, parameters, cut):
+    """
+    This function plots a histogram of trajectory lengths (in units of frames) and two types of plots of
+    trajectories (original and overlay).
+
+    Inputs:
+    path2: string.  Name of input trajectory csv files.
+    folder: string. Name of folder to which to save results.
+    frames: integer.  Total number of frames in videos.
+    conversion: array.  Contains microns per pixel and frames per second of videos.
+    parameters:
+
+    parameters = {}
+    parameters["channels"] = ["RED"]
+    parameters["genotypes"] = ["WT"]
+    parameters["pups"] = ["P1", "P2", "P3"]
+    parameters["surface functionalities"] = ["PEG"]
+    parameters["slices"] = ["S1", "S2", "S3"]
+    parameters["regions"] = ["cortex", "mid"]
+    parameters["replicates"] = [1, 2, 3, 4]
+
+    cut: integer.  Minimum number of frames a trajectory must have in order to be plotted.
+    """
+
+    channels = parameters["channels"]
+    genotypes = parameters["genotypes"]
+    pups = parameters["pups"]
+    surface_functionalities = parameters["surface functionalities"]
+    slices = parameters["slices"]
+    regions = parameters["regions"]
+    replicates = parameters["replicates"]
+
+    trajectory = {}
+    names_with_replicates = {}
+    data = {}
+
+    particles_unfiltered = {}
+    framed_unfiltered = {}
+    x_data_unfiltered = {}
+    y_data_unfiltered = {}
+    total_unfiltered = {}
+    particles = {}
+    framed = {}
+    x_data = {}
+    y_data = {}
+    total = {}
+    tlength = {}
+    x_microns = {}
+    y_microns = {}
+    x_particle = {}
+    y_particle = {}
+
+    x_original_frames = {}
+    y_original_frames = {}
+
+    x_adjusted_frames = {}
+    y_adjusted_frames = {}
+
+    counter2 = 0
+
+    for channel in channels:
+        for genotype in genotypes:
+            for surface_functionality in surface_functionalities:
+                for region in regions:
+                    for pup in pups:
+                        for slic in slices:
+                            for replicate in replicates:
+
+                                # Establishing sample names and extracting data from csv files.
+                                counter2 = counter2 + 1
+                                sample_name_long = "{}_{}_{}_{}_{}_{}_{}".format(channel, genotype, surface_functionality,
+                                                                                 region, pup, slic, replicate)
+                                names_with_replicates[counter2] = sample_name_long
+
+                                filename = path2.format(channel=channel, genotype=genotype, pup=pup, region=region, sample_name=sample_name_long)
+                                data[sample_name_long] = np.genfromtxt(filename, delimiter=",")
+                                data[sample_name_long] = np.delete(data[sample_name_long], 0, 1)
+
+                                # Names of output plots
+                                logplot = folder.format(channel=channel, genotype=genotype,
+                                                        pup=pup, region=region)+'{}_logplot'.format(sample_name_long)
+                                Mplot = folder.format(channel=channel, genotype=genotype, pup=pup, region=region)+'{}_Mplot'.format(sample_name_long)
+                                Dplot = folder.format(channel=channel, genotype=genotype, pup=pup, region=region)+'{}_Dplot'.format(sample_name_long)
+                                Hplot = folder.format(channel=channel, genotype=genotype, pup=pup, region=region)+'{}_Hplot'.format(sample_name_long)
+                                Hlogplot = folder.format(channel=channel, genotype=genotype,
+                                                         pup=pup, region=region)+'{}_Hlogplot'.format(sample_name_long)
+                                Cplot = folder.format(channel=channel, genotype=genotype,
+                                                      pup=pup, region=region)+'{}_Cplot'.format(sample_name_long)
+                                Tplot = folder.format(channel=channel, genotype=genotype,
+                                                      pup=pup, region=region)+'{}_Tplot'.format(sample_name_long)
+                                T2plot = folder.format(channel=channel, genotype=genotype,
+                                                       pup=pup, region=region)+'{}_T2plot'.format(sample_name_long)
+                                lenplot = folder.format(channel=channel, genotype=genotype,
+                                                        pup=pup, region=region)+'{}_lenplot'.format(sample_name_long)
+
+                                # Fill in data and split into individual trajectories
+                                particles_unfiltered[counter2], framed_unfiltered[counter2], x_data_unfiltered[counter2],\
+                                    y_data_unfiltered[counter2] = fill_in_and_split(data[names_with_replicates[counter2]])
+
+                                total_unfiltered[counter2] = int(max(particles_unfiltered[counter2]))
+
+                                # Filter out short trajectories
+                                particles[counter2], framed[counter2], x_data[counter2], y_data[counter2] =\
+                                    filter_out_short_traj(particles_unfiltered[counter2], framed_unfiltered[counter2],
+                                                          x_data_unfiltered[counter2], y_data_unfiltered[counter2], cut)
+
+                                # Convert to microns and seconds
+                                time, time_SD = build_time_array(frames, conversion, SD_frames)
+                                framen = np.linspace(0, frames, frames+1).astype(np.int64)
+                                total[counter2] = int(max(particles[counter2]))
+                                tlength[counter2] = np.zeros(total[counter2])
+
+                                x_microns[counter2] = x_data[counter2]*conversion[0]
+                                y_microns[counter2] = y_data[counter2]*conversion[0]
+
+                                # Adjust frames (probably unneccesary, but I did it...)
+                                x_particle[counter2] = {}
+                                y_particle[counter2] = {}
+
+                                x_original_frames[counter2] = {}
+                                y_original_frames[counter2] = {}
+
+                                x_adjusted_frames[counter2] = {}
+                                y_adjusted_frames[counter2] = {}
+
+                                for num in range(1, total[counter2] + 1):
+                                    hold = np.where(particles[counter2] == num)
+                                    itindex = hold[0]
+                                    min1 = min(itindex)
+                                    max1 = max(itindex)
+                                    x_particle[counter2][num] = x_microns[counter2][min1:max1+1]
+                                    y_particle[counter2][num] = y_microns[counter2][min1:max1+1]
+
+                                    x_original_frames[counter2][num] = np.zeros(frames + 1)
+                                    y_original_frames[counter2][num] = np.zeros(frames + 1)
+                                    x_adjusted_frames[counter2][num] = np.zeros(frames + 1)
+                                    y_adjusted_frames[counter2][num] = np.zeros(frames + 1)
+
+                                    x_original_frames[counter2][num][framed[counter2][min1]:framed[counter2][max1]+1]\
+                                        = x_microns[counter2][min1:max1+1]
+                                    y_original_frames[counter2][num][framed[counter2][min1]:framed[counter2][max1]+1]\
+                                        = y_microns[counter2][min1:max1+1]
+
+                                    x_adjusted_frames[counter2][num][0:max1+1-min1] = x_microns[counter2][min1:max1+1]
+                                    y_adjusted_frames[counter2][num][0:max1+1-min1] = y_microns[counter2][min1:max1+1]
+
+                                    x_original_frames[counter2][num] = ma.masked_equal(x_original_frames[counter2][num], 0)
+                                    y_original_frames[counter2][num] = ma.masked_equal(y_original_frames[counter2][num], 0)
+                                    x_adjusted_frames[counter2][num] = ma.masked_equal(x_adjusted_frames[counter2][num], 0)
+                                    y_adjusted_frames[counter2][num] = ma.masked_equal(y_adjusted_frames[counter2][num], 0)
+
+                                    tlength[counter2][num - 1] = ma.count(x_adjusted_frames[counter2][num])
+
+                                plot_traj(x_original_frames[counter2], y_original_frames[counter2], total[counter2], T2plot)
+                                plt.gcf().clear()
+                                plot_trajectory_overlay(x_original_frames[counter2], y_original_frames[counter2], 6, 2, 6, Tplot)
+                                plt.gcf().clear()
+                                plot_traj_length_histogram(tlength[counter2], max(tlength[counter2]), lenplot)
+                                plt.gcf().clear()
