@@ -722,3 +722,72 @@ def filter_out_short_traj(particles_unfiltered, framed_unfiltered, x_data_unfilt
             counter2 = counter2 + 1
 
     return particles_filtered, framed_filtered, x_data_filtered, y_data_filtered
+
+
+def plot_trajectory_overlay(x, y, graph_size, ticks, number_of_trajectories, Tplot):
+    """
+    This function plots a random selection of trajectories from an x,y trajectory dataset. The user can
+    manipulate size of the graph, tick interval size, and the number of trajectories to be plotted.
+    """
+    unit = graph_size
+
+    maxx = unit + 0.1
+    minx = -unit - 0.1
+    maxy = unit + 0.1
+    miny = -unit - 0.1
+
+    random_particles = np.zeros(number_of_trajectories)
+    for num in range(0, number_of_trajectories):
+        random_particles[num] = np.random.random_integers(1, max(x))
+
+    dec = 0
+    xc = dict()
+    yc = dict()
+    xcmask = dict()
+
+    # Creates figure
+    fig1 = plt.figure(figsize=(24, 18), dpi=80)
+    ax1 = fig1.add_subplot(111)
+
+    for num in range(1, random_particles.shape[0]+1):
+        lowx = ma.min(x[random_particles[num-1]])
+        highx = ma.max(x[random_particles[num-1]])
+        lowy = ma.min(y[random_particles[num-1]])
+        highy = ma.max(y[random_particles[num-1]])
+
+        xc[random_particles[num-1]] = np.array([x[random_particles[num-1]] - ((highx+lowx)/2)])
+        yc[random_particles[num-1]] = np.array([y[random_particles[num-1]] - ((highy+lowy)/2)])
+
+        xcmask[random_particles[num-1]] = x[random_particles[num-1]].recordmask
+        xc[random_particles[num-1]] = ma.array(xc[random_particles[num-1]], mask=xcmask[random_particles[num-1]])
+        yc[random_particles[num-1]] = ma.array(yc[random_particles[num-1]], mask=xcmask[random_particles[num-1]])
+
+        ax1.plot(xc[random_particles[num-1]][0, :], yc[random_particles[num-1]][0, :],
+                 linewidth=10, label='Particle {}'.format(random_particles[num-1]))
+
+    # A few adjustments to prettify the graph
+    for item in ([ax1.xaxis.label, ax1.yaxis.label] +
+                 ax1.get_xticklabels() + ax1.get_yticklabels()):
+        item.set_fontsize(70)
+
+    xmajor_ticks = np.arange(minx, maxx, ticks)
+    ymajor_ticks = np.arange(miny, maxy, ticks)
+
+    ax1.set_xticks(xmajor_ticks)
+    ax1.set_yticks(ymajor_ticks)
+    ax1.title.set_fontsize(70)
+    ax1.set_xlabel(r'x ($\mu$m)', fontsize=95)
+    ax1.set_ylabel(r'y ($\mu$m)', fontsize=95)
+    ax1.tick_params(direction='out', pad=16)
+    plt.xticks(rotation=-30)
+    # ax1.legend(loc=(0.60, 0.46), prop={'size': 40})
+    plt.gca().xaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
+    plt.gca().yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter('%.{}f'.format(dec)))
+
+    # plt.yscale('log')
+    # plt.xscale('log')
+    plt.gca().set_xlim([minx, maxx])
+    plt.gca().set_ylim([miny, maxy])
+
+    # Save your figure
+    plt.savefig('{}.png'.format(Tplot), bbox_inches='tight')
