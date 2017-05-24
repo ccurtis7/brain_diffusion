@@ -609,7 +609,7 @@ def plot_traj_length_histogram(length, total, filename):
     return hist, total1
 
 
-def plot_traj(xts, yts, total):
+def plot_traj(xts, yts, total, T2plot):
     """
     This function plots the trajectories of the particles as they were originally caught on the
     microscope (no centering performed).
