@@ -83,7 +83,7 @@ def return_average(data, frames=90, to_average='YG_nPEG_in_agarose_1x'):
             to_avg[counter] = keys
             counter = counter + 1
 
-    if isinstance(data[to_avg[0]], list):
+    if not isinstance(data[to_avg[0]], float):
 
         to_avg_num = np.zeros((frames, counter))
         for i in range(0, counter):
@@ -91,9 +91,7 @@ def return_average(data, frames=90, to_average='YG_nPEG_in_agarose_1x'):
                 to_avg_num[j, i] = data[to_avg[i]][j]
 
         answer = np.mean(to_avg_num, axis=1)
-
     else:
-
         to_avg_num = np.zeros(counter)
         for i in range(0, counter):
             to_avg_num[i] = data[to_avg[i]]
@@ -204,7 +202,7 @@ def return_SD(data, frames=90, SD_frames=[1, 7, 14, 15], to_stdev='YG_nPEG_in_ag
             to_SD[counter] = keys
             counter = counter + 1
 
-    if isinstance(data[to_SD[0]], list):
+    if not isinstance(data[to_SD[0]], float):
         to_SD_num = np.zeros((frames, counter))
         for i in range(0, counter):
             for j in range(0, frames):
