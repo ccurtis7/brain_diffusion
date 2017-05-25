@@ -65,7 +65,7 @@ def build_time_array(frames=90, conversion=(0.16, 9.89, 1), SD_frames=[1, 7, 14]
     return time, time_SD
 
 
-def return_average(data, frames, to_average='YG_nPEG_in_agarose_1x'):
+def return_average(data, frames=90, to_average='YG_nPEG_in_agarose_1x'):
     """
     Averages over replicates within a sample.
 
@@ -83,12 +83,22 @@ def return_average(data, frames, to_average='YG_nPEG_in_agarose_1x'):
             to_avg[counter] = keys
             counter = counter + 1
 
-    to_avg_num = np.zeros((frames, counter))
-    for i in range(0, counter):
-        for j in range(0, frames):
-            to_avg_num[j, i] = data[to_avg[i]][j]
+    if isinstance(data[to_avg[0]], list):
 
-    answer = np.mean(to_avg_num, axis=1)
+        to_avg_num = np.zeros((frames, counter))
+        for i in range(0, counter):
+            for j in range(0, frames):
+                to_avg_num[j, i] = data[to_avg[i]][j]
+
+        answer = np.mean(to_avg_num, axis=1)
+
+    else:
+
+        to_avg_num = np.zeros(counter)
+        for i in range(0, counter):
+            to_avg_num[i] = data[to_avg[i]]
+
+        answer = np.mean(to_avg_num)
 
     return answer
 
@@ -194,13 +204,21 @@ def return_SD(data, frames=90, SD_frames=[1, 7, 14, 15], to_stdev='YG_nPEG_in_ag
             to_SD[counter] = keys
             counter = counter + 1
 
-    to_SD_num = np.zeros((frames, counter))
-    for i in range(0, counter):
-        for j in range(0, frames):
-            to_SD_num[j, i] = data[to_SD[i]][j]
+    if isinstance(data[to_SD[0]], list):
+        to_SD_num = np.zeros((frames, counter))
+        for i in range(0, counter):
+            for j in range(0, frames):
+                to_SD_num[j, i] = data[to_SD[i]][j]
 
-    answer = np.std(to_SD_num, axis=1)
-    answer_sep = answer[SD_frames[:]]
+        answer = np.std(to_SD_num, axis=1)
+        answer_sep = answer[SD_frames[:]]
+
+    else:
+        to_SD_num = np.zeros(counter)
+        for i in range(0, counter):
+            to_SD_num[i] = data[to_SD[i]]
+
+        answer_sep = np.std(to_SD_num)
 
     return answer_sep
 
@@ -954,3 +972,76 @@ def quality_control(path2, folder, frames, conversion, parameters, cut):
                                 plt.gcf().clear()
                                 plot_traj_length_histogram(tlength[counter2], max(tlength[counter2]), lenplot)
                                 plt.gcf().clear()
+
+
+def diffusion_coefficient_point_derivative(MSDs, time, time_to_calculate, dimension):
+    """
+    This function calculates the diffusion coefficient from a mean squared displacement dataset.
+
+    Inputs:
+    MSDs: array.
+    time: array.  Must be one unit longer than the MSDs array.
+    time_to_calculate: float.  Time at which the diffusion coefficient is to be calculated.
+    dimension: string, either "1D", "2D", or "3D."
+
+    Outputs:
+    diffusion_coef_point_derivative: float.
+    """
+
+    if dimension == "1D":
+        dimension_coefficient = 2
+    elif dimension == "2D":
+        dimension_coefficient = 4
+    elif dimension == "3D":
+        dimension_coefficient = 6
+    else:
+        print("Error: dimension must be string 1D, 2D, or 3D.")
+
+    diffusion_coefficients = MSDs/(dimension_coefficient*time[:-1])
+
+    def find_nearest(array, value):
+        idx = (np.abs(array-value)).argmin()
+        return array[idx], idx
+
+    time_close, time_at_diffusion_calc = find_nearest(time, time_to_calculate)
+    diffusion_coef_point_derivative = diffusion_coefficients[time_at_diffusion_calc]
+
+    return diffusion_coef_point_derivative
+
+
+def diffusion_coefficient_linear_regression(MSDs, time, to_frame, dimension):
+    """
+    This function calculates the diffusion coefficient from a mean squared displacement dataset
+    by using linear regression.
+
+    Inputs:
+    MSDs: array.
+    time: array.  Must be one unit longer than the MSDs array.
+    to_frame: frame at which to cut MSD data for linear regression calculation.
+    dimension: string, either "1D", "2D", or "3D."
+
+    Outputs:
+    diffusion_coef_point_linear_fit.
+    """
+
+    if dimension == "1D":
+        dimension_coefficient = 2
+    elif dimension == "2D":
+        dimension_coefficient = 4
+    elif dimension == "3D":
+        dimension_coefficient = 6
+    else:
+        print("Error: dimension must be string 1D, 2D, or 3D.")
+
+    fit_coefficients = dict()
+    residuals = dict()
+    line = dict()
+    A1 = np.ones((np.shape(time[:-1])[0], 2))
+    A1[:, 0] = time[:-1]
+
+    fit_coefficients[0], residuals[0] = np.linalg.lstsq(A1[1:to_frame, :], MSDs[1:to_frame])[0:2]
+
+    line[0] = fit_coefficients[0][0]*time[:-1] + fit_coefficients[0][1]
+
+    diffusion_coefficient_linear_fit = fit_coefficients[0][0]/dimension_coefficient
+    return diffusion_coefficient_linear_fit
