@@ -1020,6 +1020,21 @@ def diffusion_coefficient_linear_regression(MSDs, time, to_frame, dimension):
 
     Outputs:
     diffusion_coef_point_linear_fit.
+
+    Example:
+
+    grouped_variables = ["RED", "YG", "B"]
+    subgrouped_variables = ["P1", "P2", "P3", "P4"]
+
+    data_to_graph = {"RED_P1": 0.5, "RED_P2": 1, "RED_P3": 1.5, "YG_P1": 1, "YG_P2": 1, "YG_P3": 1, "B_P1":
+    0.2, "B_P2": 5, "B_P3": 0.1, "RED_P4": 0.3, "YG_P4": 1.8, "B_P4": 3.6}
+    stds_to_graph = {"RED_P1": 0.1, "RED_P2": 0.05, "RED_P3": 0.1, "YG_P1": 0.05, "YG_P2": 0.1, "YG_P3": 0.05,
+    "B_P1": 0.5, "B_P2": 0.5, "B_P3": 0.5, "RED_P4": 0.3, "YG_P4": 0.5, "B_P4": 0.6}
+
+    sample_size = 3
+
+    filename = "test.png"
+    legend_location = "top_left"
     """
 
     if dimension == "1D":
@@ -1043,3 +1058,124 @@ def diffusion_coefficient_linear_regression(MSDs, time, to_frame, dimension):
 
     diffusion_coefficient_linear_fit = fit_coefficients[0][0]/dimension_coefficient
     return diffusion_coefficient_linear_fit
+
+
+def diffusion_bar_chart(grouped_variables, subgrouped_variables, data_to_graph, stds_to_graph, sample_size, filename, legend_position="top_left",
+                        manual_y_axis=False, y_max=1.5):
+    """
+    This is a fairly comprehensive function for plotting diffusion bar charts complete with error bars.
+
+    Inputs:
+
+    grouped_variables: array.  Corresponds to variables that will appear on x axis.
+    subgrouped_variables: array.  Corresponds to variables that will appear in legend.
+    data_to_graph: dictionary.  Keys must contain both grouped_variables and subgrouped variables.
+    stds_to_graph: dictionary.  Keys must contain both grouped_variables and sub_grouped variables.
+    sample_size: scalar.  Number of samples used to find each datapoint.
+    filename: string. Desired name of file with file extension.
+
+    legend_position: string.  top_left, top_right, left_shifted_one, right_shifted_one.
+    """
+
+    if manual_y_axis:
+        graph_max = y_max
+    else:
+        graph_max = max(data_to_graph.values())
+    line_colors = ['gray', 'lightgray', 'brown', 'g', 'r', 'b', 'c', 'm', 'k']
+    legend_size = 40
+    width = 0.2
+    N_groups = len(grouped_variables)
+    N_subgroups = len(subgrouped_variables)
+
+    legend_location = {"top_left": (0.0048*legend_size, 1), "top_right": (1, 1), "left_shifted_one": (0.0048*legend_size+width, 1),
+                       "right_shifted_one": (1-width, 1)}
+    bar_values = {}
+    bar_stds = {}
+    rects = {}
+    error_kws = dict(elinewidth=10, ecolor='k', capsize=15, markeredgewidth=10)
+    label_size = 70
+
+    plt.rc('axes', linewidth=4)
+    plt.rc('font', weight='bold')
+    fig, ax = plt.subplots(figsize=(26, 18))
+
+    ind = np.arange(N_groups)
+    labels = N_groups*["None"]
+    legendees = N_subgroups*["None"]
+    legend_labels = N_subgroups*["None"]
+
+    counter_subgroup = 0
+    for subgroup in subgrouped_variables:
+        bar_values[subgroup] = np.zeros(N_groups)
+        bar_stds[subgroup] = np.zeros(N_groups)
+
+        counter_group = 0
+        for group in grouped_variables:
+
+            for keys in data_to_graph:
+                if subgroup in keys:
+                    if group in keys:
+                        bar_values[subgroup][counter_group] = data_to_graph[keys]
+                        bar_stds[subgroup][counter_group] = stds_to_graph[keys]
+            labels[counter_group] = group
+            counter_group = counter_group + 1
+
+        rects[subgroup] = ax.bar(ind + counter_subgroup*width - width/2, bar_values[subgroup], width, yerr=bar_stds[subgroup]/np.sqrt(sample_size),
+                                 color=line_colors[counter_subgroup], linewidth=5, error_kw=error_kws)
+        legendees[counter_subgroup] = rects[subgroup][0]
+        legend_labels[counter_subgroup] = subgroup
+        counter_subgroup = counter_subgroup + 1
+
+    ax.set_ylabel(r'Diffusion Coefficients ($\mu$m$^2$/s)', size=label_size)
+    ax.set_xticks(ind + width / 2)
+    ax.set_xticklabels(labels)
+    legend = ax.legend(legendees, legend_labels, prop={'size': legend_size}, bbox_to_anchor=legend_location[legend_position])
+    legend.get_frame().set_linewidth(5)
+
+    ax.tick_params(axis="both", labelsize="40", direction='out', pad=20)
+    plt.xlim([min(ind)-0.4, max(ind)+0.75])
+    plt.ylim([0, graph_max+0.1*graph_max])
+
+    plt.savefig(filename, bbox_inches='tight')
+
+
+def summary_barcharts(diffusion_dataset, parameters):
+    """
+    This uses the general function diffusion_bar_chart to plot specific output from
+    calculate_diffusion_coefficients.  diffusion_dataset must be of the correct form
+    specific to calculate_diffusion_coefficients.
+    """
+
+    relevant_dataset = diffusion_dataset["average_over_slices"]
+    relevant_stds = diffusion_dataset["all_SD_over_slices"]
+    examined_variable = parameters["channels"]
+
+    data_to_graph = {}
+    stds_to_graph = {}
+    grouped_variables = parameters["regions"]
+    subgrouped_variables = parameters["pups"]
+    sample_size = len(parameters["slices"])
+    graph_max = max(relevant_dataset.values())
+
+    counter = 0
+    for variable in examined_variable:
+        data_to_graph[variable] = {}
+        stds_to_graph[variable] = {}
+
+        for keys in relevant_dataset:
+            if variable in keys:
+                data_to_graph[variable][keys] = relevant_dataset[keys]
+                stds_to_graph[variable][keys] = relevant_stds[keys]
+
+        filename = "diffusion_barchart_{}.png".format(variable)
+        diffusion_bar_chart(grouped_variables, subgrouped_variables, data_to_graph[variable], stds_to_graph[variable], sample_size, filename,
+                            manual_y_axis=True, y_max=graph_max, legend_position="top_right")
+        counter = counter + 1
+
+    outer_average = diffusion_dataset["average_over_pups"]
+    outer_stds = diffusion_dataset["all_SD_over_pups"]
+    sample_size2 = len(parameters["pups"])
+
+    filename2 = "diffusion_barchart.png"
+    diffusion_bar_chart(parameters["channels"], parameters["regions"], outer_average, outer_stds, sample_size2, filename2,
+                        manual_y_axis=True, y_max=graph_max, legend_position="top_right")
