@@ -1060,6 +1060,103 @@ def diffusion_coefficient_linear_regression(MSDs, time, to_frame, dimension):
     return diffusion_coefficient_linear_fit
 
 
+def calculate_diffusion_coefficients(channels, genotypes, pups, surface_functionalities, slices, regions, replicates, path,
+                                     time, time_to_calculate, to_frame, dimension):
+
+    """
+    Loads data from csv files and outputs a dictionary following a specified
+        sample naming convection determined by the input
+
+    Parameters:
+    channels, surface functionalities, media, and concentrations, and replicates
+        can take ranges or lists.
+    path is string with substition placeholders for concentration and sample
+        name (built from channels, surface_functionalities, media,
+        concentrations, and replicates).
+
+    Example:
+    path = "./{genotype}/{pup}/{region}/{channel}/geoM2xy_{sample_name}.csv";
+    get_data(["RED", "YG"], ["WT", "KO", "HET"], ["P1", "P2", "P3", "P4"],
+    ["PEG", "noPEG"], ["S1", "S2", "S3", "S4"], ["cortex", "hipp", "mid"],
+    [1, 2, 3, 4, 5], path)
+    """
+
+    data = {}
+    avg_over_slices_raw = {}
+    avg_over_pups_raw = {}
+    names_with_replicates = {}
+    counter = 0
+    counter2 = 0
+
+    diffusion_coef_point_derivative = {}
+    diffusion_coef_linear_fit = {}
+
+    for channel in channels:
+        for genotype in genotypes:
+            for surface_functionality in surface_functionalities:
+                for region in regions:
+                    for pup in pups:
+                        for slic in slices:
+                            test_value = "{}_{}_{}_{}_{}".format(channel, genotype, surface_functionality, region, pup)
+                            avg_over_slices_raw[counter] = test_value
+                            test_value2 = "{}_{}_{}_{}".format(channel, genotype, surface_functionality, region)
+                            avg_over_pups_raw[counter] = test_value2
+                            counter = counter + 1
+                            sample_name = "{}_{}_{}_{}_{}_{}".format(channel, genotype, surface_functionality, region, pup, slic)
+                            for replicate in replicates:
+                                sample_name_long = "{}_{}_{}_{}_{}_{}_{}".format(channel, genotype, surface_functionality,
+                                                                                 region, pup, slic, replicate)
+                                names_with_replicates[counter2] = sample_name_long
+                                counter2 = counter2 + 1
+                            filename = path.format(channel=channel, genotype=genotype, pup=pup, region=region, sample_name=sample_name)
+                            data[sample_name] = np.genfromtxt(filename, delimiter=",")
+
+                            diffusion_coef_point_derivative[sample_name] =\
+                                diffusion_coefficient_point_derivative(data[sample_name], time, time_to_calculate, dimension)
+                            diffusion_coef_linear_fit[sample_name] =\
+                                diffusion_coefficient_linear_regression(data[sample_name], time, to_frame, dimension)
+
+    avg_over_slices = {}
+    avg_over_pups = {}
+
+    counter = 0
+    for key, value in avg_over_slices_raw.items():
+        if value not in avg_over_slices.values():
+            avg_over_slices[counter] = value
+            counter = counter + 1
+
+    counter = 0
+    for key, value in avg_over_pups_raw.items():
+        if value not in avg_over_pups.values():
+            avg_over_pups[counter] = value
+            counter = counter + 1
+
+    p_derivative = {}
+    lin_fit = {}
+
+    p_derivative["average_over_slices"] = {}
+    p_derivative["average_over_pups"] = {}
+    p_derivative["all_SD_over_slices"] = {}
+    p_derivative["all_SD_over_pups"] = {}
+
+    lin_fit["average_over_slices"] = {}
+    lin_fit["average_over_pups"] = {}
+    lin_fit["all_SD_over_slices"] = {}
+    lin_fit["all_SD_over_pups"] = {}
+
+    p_derivative["average_over_slices"] = avg_all(diffusion_coef_point_derivative, 2, avg_over_slices)
+    p_derivative["average_over_pups"] = avg_all(p_derivative["average_over_slices"], 2, avg_over_pups)
+    p_derivative["all_SD_over_slices"] = SD_all(diffusion_coef_point_derivative, 2, [], avg_over_slices)
+    p_derivative["all_SD_over_pups"] = SD_all(p_derivative["average_over_slices"], 2, [], avg_over_pups)
+
+    lin_fit["average_over_slices"] = avg_all(diffusion_coef_linear_fit, 2, avg_over_slices)
+    lin_fit["average_over_pups"] = avg_all(lin_fit["average_over_slices"], 2, avg_over_pups)
+    lin_fit["all_SD_over_slices"] = SD_all(diffusion_coef_linear_fit, 2, [], avg_over_slices)
+    lin_fit["all_SD_over_pups"] = SD_all(lin_fit["average_over_slices"], 2, [], avg_over_pups)
+
+    return p_derivative, lin_fit
+
+
 def diffusion_bar_chart(grouped_variables, subgrouped_variables, data_to_graph, stds_to_graph, sample_size, filename, legend_position="top_left",
                         manual_y_axis=False, y_max=1.5):
     """
