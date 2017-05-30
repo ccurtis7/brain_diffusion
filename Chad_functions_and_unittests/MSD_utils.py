@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy.ma as ma
+import scipy.stats as stat
 
 
 def get_data_gels(channels, surface_functionalities, media, concentrations, replicates, path):
@@ -1276,3 +1277,163 @@ def summary_barcharts(diffusion_dataset, parameters):
     filename2 = "diffusion_barchart.png"
     diffusion_bar_chart(parameters["channels"], parameters["regions"], outer_average, outer_stds, sample_size2, filename2,
                         manual_y_axis=True, y_max=graph_max, legend_position="top_right")
+
+
+def calculate_MMSDs(parameters, folder, size, if_localn_error=True):
+    """
+    Calculates the mean squared displacement based on the output of my Hyak code.
+    In order to run, must have a csv files with prefixes "pM1x", "pM1y", and "pM2xy"
+    in the called upon folders.
+
+    Inputs:
+    parameters: dictionary of strings.
+    folder: string.  Identifies location of csv files to be used for MMSD calculations.
+    size: float.  Equal to the number of nodes Hyak used to break up dataset.
+    """
+
+    channels = parameters["channels"]
+    genotypes = parameters["genotypes"]
+    pups = parameters["pups"]
+    surface_functionalities = parameters["surface functionalities"]
+    slices = parameters["slices"]
+    regions = parameters["regions"]
+    replicates = parameters["replicates"]
+
+    SM1x = {}
+    SM1y = {}
+    SM2xy = {}
+
+    for channel in channels:
+        for genotype in genotypes:
+            for surface_functionality in surface_functionalities:
+                for region in regions:
+                    for pup in pups:
+                        slice_counter = 0
+                        for slic in slices:
+
+                            suffix = parameters["slice_suffixes"][slice_counter]  # Define slice suffixes (currently a, b, c)
+                            with open(folder.format(genotype=genotype, pup=pup, region=region,
+                                                    channel=channel)+'/pM1x'+suffix+'_0.csv', "rb") as f_handle:
+                                interim = np.genfromtxt(f_handle, delimiter=",")  # interim defines local_n.
+
+                            sample_name = "{}_{}_{}_{}_{}_{}".format(channel, genotype, surface_functionality, region, pup, slic)
+                            print("name is", sample_name)
+
+                            # For some reason, I often get an error if local_n is exactly interim.shape. This avoids that error, if needed.
+                            if if_localn_error:
+                                local_n = interim.shape[1] - 1
+                            else:
+                                local_n = interim.shape[1]
+
+                            SM1x[sample_name] = {}
+                            SM1y[sample_name] = {}
+                            SM2xy[sample_name] = {}
+
+                            # This defines shifted (S) MSDs for each particle.
+                            for num in range(0, size):
+                                with open(folder.format(genotype=genotype, pup=pup, region=region,
+                                          channel=channel)+'/pM1x'+suffix+'_{}.csv'.format(num), "rb") as f_handle:
+                                    interim = np.genfromtxt(f_handle, delimiter=",")
+                                for i in range(1, local_n+1):
+                                    current = local_n*num + i
+                                    SM1x[sample_name][current] = interim[:, i-1]
+                                with open(folder.format(genotype=genotype, pup=pup, region=region,
+                                          channel=channel)+'/pM1y'+suffix+'_{}.csv'.format(num), "rb") as f_handle:
+                                    interim1 = np.genfromtxt(f_handle, delimiter=",")
+                                for i in range(1, local_n+1):
+                                    current = local_n*num + i
+                                    SM1y[sample_name][current] = interim1[:, i-1]
+                                with open(folder.format(genotype=genotype, pup=pup, region=region,
+                                          channel=channel)+'/pM2xy'+suffix+'_{}.csv'.format(num), "rb") as f_handle:
+                                    interim2 = np.genfromtxt(f_handle, delimiter=",")
+                                for i in range(1, local_n+1):
+                                    current = local_n*num + i
+                                    SM2xy[sample_name][current] = interim2[:, i-1]
+
+                            total_check = local_n*size
+                            tots = total_check
+
+                            arM1x = np.zeros(SM1x[sample_name][1].shape[0])
+                            arM1y = np.zeros(SM1x[sample_name][1].shape[0])
+                            arM2xy = np.zeros(SM1x[sample_name][1].shape[0])
+
+                            st_arM1x = np.zeros(SM1x[sample_name][1].shape[0])
+                            st_arM1y = np.zeros(SM1x[sample_name][1].shape[0])
+                            st_arM2xy = np.zeros(SM1x[sample_name][1].shape[0])
+
+                            gM1x = dict()
+                            gM1y = dict()
+                            gM2xy = dict()
+
+                            log_gM1x = dict()
+                            log_gM1y = dict()
+                            log_gM2xy = dict()
+
+                            geoM1x = np.zeros(SM1x[sample_name][1].shape[0])
+                            geoM1y = np.zeros(SM1x[sample_name][1].shape[0])
+                            geoM2xy = np.zeros(SM1x[sample_name][1].shape[0])
+
+                            st_geoM1x = np.zeros(SM1x[sample_name][1].shape[0])
+                            st_geoM1y = np.zeros(SM1x[sample_name][1].shape[0])
+                            st_geoM2xy = np.zeros(SM1x[sample_name][1].shape[0])
+
+                            # Calculating geometric and arithmetic means
+                            for num2 in range(0, SM1x[sample_name][1].shape[0]):
+                                gM1x[num2+1] = np.zeros(tots)
+                                gM1y[num2+1] = np.zeros(tots)
+                                gM2xy[num2+1] = np.zeros(tots)
+
+                                for num in range(1, tots+1):
+                                    gM1x[num2+1][num-1] = SM1x[sample_name][num][num2]
+                                    gM1y[num2+1][num-1] = SM1y[sample_name][num][num2]
+                                    gM2xy[num2+1][num-1] = SM2xy[sample_name][num][num2]
+
+                                gM1x[num2+1] = ma.masked_invalid(gM1x[num2+1])
+                                gM1y[num2+1] = ma.masked_invalid(gM1y[num2+1])
+                                gM2xy[num2+1] = ma.masked_invalid(gM2xy[num2+1])
+
+                                gM1x[num2+1] = ma.masked_equal(gM1x[num2+1], 0)
+                                gM1y[num2+1] = ma.masked_equal(gM1y[num2+1], 0)
+                                gM2xy[num2+1] = ma.masked_equal(gM2xy[num2+1], 0)
+
+                                log_gM1x[num2+1] = np.log(gM1x[num2+1])
+                                log_gM1y[num2+1] = np.log(gM1y[num2+1])
+                                log_gM2xy[num2+1] = np.log(gM2xy[num2+1])
+
+                                geoM1x[num2] = stat.gmean(gM1x[num2+1])
+                                geoM1y[num2] = stat.gmean(gM1y[num2+1])
+                                geoM2xy[num2] = stat.gmean(gM2xy[num2+1])
+
+                                st_geoM1x[num2] = np.abs(geoM1x[num2]-np.exp(np.mean(
+                                    np.log(gM1x[num2+1]))-np.std(np.log(gM1x[num2+1]))/np.sqrt(gM1x[num2+1].shape[0])))
+                                st_geoM1y[num2] = np.abs(geoM1y[num2]-np.exp(np.mean(
+                                    np.log(gM1y[num2+1]))-np.std(np.log(gM1y[num2+1]))/np.sqrt(gM1y[num2+1].shape[0])))
+                                st_geoM2xy[num2] = np.abs(geoM2xy[num2]-np.exp(np.mean(np.log(
+                                    gM2xy[num2+1]))-np.std(np.log(gM2xy[num2+1]))/np.sqrt(gM2xy[num2+1].shape[0])))
+
+                                arM1x[num2] = np.mean(gM1x[num2+1])
+                                arM1y[num2] = np.mean(gM1y[num2+1])
+                                arM2xy[num2] = np.mean(gM2xy[num2+1])
+
+                                st_arM1x[num2] = np.std(gM1x[num2+1])
+                                st_arM1y[num2] = np.std(gM1y[num2+1])
+                                st_arM2xy[num2] = np.std(gM2xy[num2+1])
+
+                            # Saves the geometric and arithmetic mean data.
+                            np.savetxt(folder.format(genotype=genotype, pup=pup, region=region,
+                                                     channel=channel)+'geoM2xy_{}.csv'.format(sample_name), geoM2xy, delimiter=',')
+                            np.savetxt(folder.format(genotype=genotype, pup=pup, region=region,
+                                                     channel=channel)+'arM2xy_{}.csv'.format(sample_name), arM2xy, delimiter=',')
+
+                            np.savetxt(folder.format(genotype=genotype, pup=pup, region=region,
+                                                     channel=channel)+'geoM1x_{}.csv'.format(sample_name), geoM1x, delimiter=',')
+                            np.savetxt(folder.format(genotype=genotype, pup=pup, region=region,
+                                                     channel=channel)+'arM1x_{}.csv'.format(sample_name), arM1x, delimiter=',')
+                            np.savetxt(folder.format(genotype=genotype, pup=pup, region=region,
+                                                     channel=channel)+'geoM1y_{}.csv'.format(sample_name), geoM1y, delimiter=',')
+                            np.savetxt(folder.format(genotype=genotype, pup=pup, region=region,
+                                                     channel=channel)+'arM1y_{}.csv'.format(sample_name), arM1y, delimiter=',')
+
+                            slice_counter = slice_counter + 1
+
+    return SM1x, SM1y, SM2xy
