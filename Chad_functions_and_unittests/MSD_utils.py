@@ -1525,8 +1525,8 @@ def plot_MSD_histogram(MSD_dataset, time, bins, filename, desired_time, diffusio
     plot_general_histogram(hist, bins, label, filename, set_y_limit=set_y_limit, y_range=y_range, set_x_limit=set_x_limit, x_range=x_range)
 
 
-def plot_all_MSD_histograms(parameters, dataset, time, bins, desired_time, diffusion_data=False, dimension="2D", set_y_limit=False, y_range=40,
-                            set_x_limit=False, x_range=40):
+def plot_all_MSD_histograms(parameters, folder, dataset, time, bins, desired_time, diffusion_data=False, dimension="2D",
+                            set_y_limit=False, y_range=40, set_x_limit=False, x_range=40):
     """
     This function plots histograms for all datasets in an experiment.  The output from calculate_MMSDs
     is used as an input to this function.
