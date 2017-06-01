@@ -1317,7 +1317,7 @@ def calculate_MMSDs(parameters, folder, size, if_localn_error=True):
                                 interim = np.genfromtxt(f_handle, delimiter=",")  # interim defines local_n.
 
                             sample_name = "{}_{}_{}_{}_{}_{}".format(channel, genotype, surface_functionality, region, pup, slic)
-                            print("name is", sample_name)
+                            #print("name is", sample_name)
 
                             # For some reason, I often get an error if local_n is exactly interim.shape. This avoids that error, if needed.
                             if if_localn_error:
@@ -1437,3 +1437,148 @@ def calculate_MMSDs(parameters, folder, size, if_localn_error=True):
                             slice_counter = slice_counter + 1
 
     return SM1x, SM1y, SM2xy
+
+
+def plot_general_histogram(dataset, bins, label, filename, set_y_limit=False, y_range=40, set_x_limit=False, x_range=40):
+    """
+    This function plots a histogram of the input dataset.
+
+    Inputs:
+    dataset: array of floats.  Contains data used to generate histogram.
+    bins: integer. desired number of bins.
+    label: string. label used along x axis.
+    filename: string.  desired name of file.  File will automatically be saved as a PNG.
+    set_y_limit: True/False.  Option to manually set the y limit of graph.
+    y_range: float.  Manually set y limit.
+    set_x_limit: True/False.  Option to manually set the x limit of graph.
+    x_range: float. Manually set x limit.
+    """
+
+    plot, bins = np.histogram(dataset, bins=bins)
+    width = 0.7 * (bins[1] - bins[0])
+    center = (bins[:-1] + bins[1:])/2
+    plt.bar(center, plot, align='center', width=width)
+    plt.xlabel(label, fontsize=20)
+
+    if set_y_limit:
+        plt.gca().set_ylim([0, y_range])
+
+    if set_x_limit:
+        plt.gca().set_xlim([0, x_range])
+
+    plt.savefig('{}.png'.format(filename), bbox_inches='tight')
+
+
+def plot_MSD_histogram(MSD_dataset, time, bins, filename, desired_time, diffusion_data=False, dimension="2D", set_y_limit=False, y_range=40,
+                       set_x_limit=False, x_range=40):
+    """
+    This function plots a histogram of a mean squared displacement dataset. The MSD data
+    can be converted to a diffusion dataset by using the diffusion_data option.
+
+    Inputs:
+    MSD_dataset: dictionary of arrays of floats.  Contains MSD data with keys corresponding to particle numbers.
+    time: array of floats.  Contains corresponding time data. Must be same for all particles in MSD dictionary.
+        Must also be one unit longer than MSD datasets.
+    bins: integer. desired number of bins.
+    filename: string.  desired name of file.  File will automatically be saved as a PNG.
+    desired_time: float.  Time at which to measure MSDs for histogram.
+    diffusion_data: True/False.  If true, will plot diffusion data instead of MSD data.
+    dimension: string.  1D, 2D, or 3D.
+    set_y_limit: True/False.  Option to manually set the y limit of graph.
+    y_range: float.  Manually set y limit.
+    set_x_limit: True/False.  Option to manually set the x limit of graph.
+    x_range: float. Manually set x limit.
+    """
+
+    total = len(MSD_dataset)
+
+    if diffusion_data:
+        label = r'Deffs ($\mu$m$^2$/s) at $\tau$ = {}s'.format(desired_time)
+
+        if dimension is "1D":
+            dimension_factor = 2
+        elif dimension is "2D":
+            dimension_factor = 4
+        else:
+            dimension_factor = 6
+
+        dataset = {}
+        for num in range(1, total+1):
+            dataset[num] = MSD_dataset[num]/(dimension_factor*time[1:])
+
+    else:
+        label = r'MSDs ($\mu$m$^2$) at $\tau$ = {}s'.format(desired_time)
+        dataset = MSD_dataset
+
+    def find_nearest(array, value):
+        idx = (np.abs(array-value)).argmin()
+        return array[idx], idx
+
+    td, idx = find_nearest(time[1:], desired_time)
+
+    hist = np.zeros(total)
+    for num in range(1, total+1):
+        hist[num-1] = dataset[num][idx]
+
+    hist = [x for x in hist if str(x) != 'nan']
+
+    plot_general_histogram(hist, bins, label, filename, set_y_limit=set_y_limit, y_range=y_range, set_x_limit=set_x_limit, x_range=x_range)
+
+
+def plot_all_MSD_histograms(parameters, dataset, time, bins, desired_time, diffusion_data=False, dimension="2D", set_y_limit=False, y_range=40,
+                            set_x_limit=False, x_range=40):
+    """
+    This function plots histograms for all datasets in an experiment.  The output from calculate_MMSDs
+    is used as an input to this function.
+
+    Inputs:
+    parameters: dictionary of form:
+
+    parameters = {}
+    parameters["channels"] = ["RED", "YG"]
+    parameters["genotypes"] = ["KO"]
+    parameters["pups"] = ["P1", "P2", "P3"]
+    parameters["surface functionalities"] = ["PEG"]
+    parameters["slices"] = ["S1", "S2", "S3"]
+    parameters["regions"] = ["cortex", "mid"]
+    parameters["replicates"] = [1, 2, 3, 4, 5]
+
+    dataset: dictionary of dictionaries of arrays of floats.  Contains MSD data with keys corresponding to
+        (1) sample names and (2) particle numbers. Use output from calculate_MMSDs preferably.
+    time: array of floats.  Contains corresponding time data. Must be same for all particles in MSD dictionary.
+        Must also be one unit longer than MSD datasets.
+    bins: integer. desired number of bins.
+    filename: string.  desired name of file.  File will automatically be saved as a PNG.
+    desired_time: float.  Time at which to measure MSDs for histogram.
+    diffusion_data: True/False.  If true, will plot diffusion data instead of MSD data.
+    dimension: string.  1D, 2D, or 3D.
+    set_y_limit: True/False.  Option to manually set the y limit of graph.
+    y_range: float.  Manually set y limit.
+    set_x_limit: True/False.  Option to manually set the x limit of graph.
+    x_range: float. Manually set x limit.
+    """
+
+    channels = parameters["channels"]
+    genotypes = parameters["genotypes"]
+    pups = parameters["pups"]
+    surface_functionalities = parameters["surface functionalities"]
+    slices = parameters["slices"]
+    regions = parameters["regions"]
+    replicates = parameters["replicates"]
+
+    for channel in channels:
+        for genotype in genotypes:
+            for surface_functionality in surface_functionalities:
+                for region in regions:
+                    for pup in pups:
+                        slice_counter = 0
+                        for slic in slices:
+
+                            sample_name = "{}_{}_{}_{}_{}_{}".format(channel, genotype, surface_functionality, region, pup, slic)
+                            #print("name is", sample_name)
+                            Hplot = folder.format(channel=channel, genotype=genotype, pup=pup, region=region)+'{}_Hplot'.format(sample_name)
+
+                            plt.gcf().clear()
+                            plot_MSD_histogram(dataset[sample_name], time, bins, Hplot, desired_time, diffusion_data=diffusion_data,
+                                               dimension=dimension, set_y_limit=set_y_limit, y_range=y_range,
+                                               set_x_limit=set_x_limit, x_range=x_range)
