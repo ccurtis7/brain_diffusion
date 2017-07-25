@@ -1317,7 +1317,7 @@ def calculate_MMSDs(parameters, folder, size, if_localn_error=True):
                                 interim = np.genfromtxt(f_handle, delimiter=",")  # interim defines local_n.
 
                             sample_name = "{}_{}_{}_{}_{}_{}".format(channel, genotype, surface_functionality, region, pup, slic)
-                            #print("name is", sample_name)
+                            # print("name is", sample_name)
 
                             # For some reason, I often get an error if local_n is exactly interim.shape. This avoids that error, if needed.
                             if if_localn_error:
@@ -1445,7 +1445,7 @@ def plot_general_histogram(dataset, bins, label, filename, set_y_limit=False, y_
 
     Inputs:
     dataset: array of floats.  Contains data used to generate histogram.
-    bins: integer. desired number of bins.
+    bins: integer or array. desired number of bins.
     label: string. label used along x axis.
     filename: string.  desired name of file.  File will automatically be saved as a PNG.
     set_y_limit: True/False.  Option to manually set the y limit of graph.
@@ -1479,7 +1479,7 @@ def plot_MSD_histogram(MSD_dataset, time, bins, filename, desired_time, diffusio
     MSD_dataset: dictionary of arrays of floats.  Contains MSD data with keys corresponding to particle numbers.
     time: array of floats.  Contains corresponding time data. Must be same for all particles in MSD dictionary.
         Must also be one unit longer than MSD datasets.
-    bins: integer. desired number of bins.
+    bins: integer or array. desired number of bins.
     filename: string.  desired name of file.  File will automatically be saved as a PNG.
     desired_time: float.  Time at which to measure MSDs for histogram.
     diffusion_data: True/False.  If true, will plot diffusion data instead of MSD data.
@@ -1490,39 +1490,71 @@ def plot_MSD_histogram(MSD_dataset, time, bins, filename, desired_time, diffusio
     x_range: float. Manually set x limit.
     """
 
-    total = len(MSD_dataset)
-
-    if diffusion_data:
-        label = r'Deffs ($\mu$m$^2$/s) at $\tau$ = {}s'.format(desired_time)
-
-        if dimension is "1D":
-            dimension_factor = 2
-        elif dimension is "2D":
-            dimension_factor = 4
-        else:
-            dimension_factor = 6
-
-        dataset = {}
-        for num in range(1, total+1):
-            dataset[num] = MSD_dataset[num]/(dimension_factor*time[1:])
-
-    else:
-        label = r'MSDs ($\mu$m$^2$) at $\tau$ = {}s'.format(desired_time)
-        dataset = MSD_dataset
-
     def find_nearest(array, value):
         idx = (np.abs(array-value)).argmin()
         return array[idx], idx
 
-    td, idx = find_nearest(time[1:], desired_time)
+    td, idx = find_nearest(time, desired_time)
 
-    hist = np.zeros(total)
-    for num in range(1, total+1):
-        hist[num-1] = dataset[num][idx]
+    if type(MSD_dataset) == type({}):
+        total = len(MSD_dataset)
 
-    hist = [x for x in hist if str(x) != 'nan']
+        if diffusion_data:
+            label = r'Deffs ($\mu$m$^2$/s) at $\tau$ = {}s'.format(desired_time)
 
-    plot_general_histogram(hist, bins, label, filename, set_y_limit=set_y_limit, y_range=y_range, set_x_limit=set_x_limit, x_range=x_range)
+            if dimension is "1D":
+                dimension_factor = 2
+            elif dimension is "2D":
+                dimension_factor = 4
+            else:
+                dimension_factor = 6
+
+            dataset = {}
+            for num in range(1, total+1):
+                dataset[num] = MSD_dataset[num]/(dimension_factor*time[1:])
+
+        else:
+            label = r'MSDs ($\mu$m$^2$) at $\tau$ = {}s'.format(desired_time)
+            dataset = MSD_dataset
+
+        td, idx = find_nearest(time[1:], desired_time)
+
+        hist = np.zeros(total)
+        for num in range(1, total+1):
+            hist[num-1] = dataset[num][idx]
+
+        hist = [x for x in hist if str(x) != 'nan']
+
+        plot_general_histogram(hist, bins, label, filename, set_y_limit=set_y_limit, y_range=y_range, set_x_limit=set_x_limit, x_range=x_range)
+
+    else:
+        total = MSD_dataset.shape[1]
+
+        if diffusion_data:
+            label = r'Deffs ($\mu$m$^2$/s) at $\tau$ = {}s'.format(desired_time)
+
+            if dimension is "1D":
+                dimension_factor = 2
+            elif dimension is "2D":
+                dimension_factor = 4
+            else:
+                dimension_factor = 6
+
+            dataset = np.zeros((frames.shape[0], total))
+            for num in range(0, total):
+                dataset[:, num] = MSD_dataset[:, num]/(dimension_factor*time[1:])
+
+        else:
+            label = r'MSDs ($\mu$m$^2$) at $\tau$ = {}s'.format(desired_time)
+            dataset = MSD_dataset
+
+        hist = np.zeros(total)
+        for num in range(0, total):
+            hist[num] = dataset[idx, num]
+
+        hist = [x for x in hist if str(x) != 'nan']
+
+        plot_general_histogram(hist, bins, label, filename, set_y_limit=set_y_limit, y_range=y_range, set_x_limit=set_x_limit, x_range=x_range)
 
 
 def plot_all_MSD_histograms(parameters, folder, dataset, time, bins, desired_time, diffusion_data=False, dimension="2D",
@@ -1547,7 +1579,7 @@ def plot_all_MSD_histograms(parameters, folder, dataset, time, bins, desired_tim
         (1) sample names and (2) particle numbers. Use output from calculate_MMSDs preferably.
     time: array of floats.  Contains corresponding time data. Must be same for all particles in MSD dictionary.
         Must also be one unit longer than MSD datasets.
-    bins: integer. desired number of bins.
+    bins: integer or array. desired number of bins.
     filename: string.  desired name of file.  File will automatically be saved as a PNG.
     desired_time: float.  Time at which to measure MSDs for histogram.
     diffusion_data: True/False.  If true, will plot diffusion data instead of MSD data.
@@ -1575,10 +1607,240 @@ def plot_all_MSD_histograms(parameters, folder, dataset, time, bins, desired_tim
                         for slic in slices:
 
                             sample_name = "{}_{}_{}_{}_{}_{}".format(channel, genotype, surface_functionality, region, pup, slic)
-                            #print("name is", sample_name)
+                            # print("name is", sample_name)
                             Hplot = folder.format(channel=channel, genotype=genotype, pup=pup, region=region)+'{}_Hplot'.format(sample_name)
 
                             plt.gcf().clear()
                             plot_MSD_histogram(dataset[sample_name], time, bins, Hplot, desired_time, diffusion_data=diffusion_data,
                                                dimension=dimension, set_y_limit=set_y_limit, y_range=y_range,
                                                set_x_limit=set_x_limit, x_range=x_range)
+
+
+def fillin2(data):
+    """
+    Fills in blanks of arrays without shifting frames by the starting frame.  Compare to fillin.
+
+    Input: trajectory dataset from MOSAIC tracking software read into a numpy array
+    Output: modified numpy array with missing frames filled in.
+    """
+
+    shap = int(max(data[:, 1])) + 1
+    shape1 = int(min(data[:, 1]))
+    newshap = shap - shape1
+    filledin = np.zeros((newshap, 5))
+    filledin[0, :] = data[0, :]
+
+    count = 0
+    new = 0
+    other = 0
+    tot = 0
+
+    for num in range(1, newshap):
+        if data[num-new, 1]-data[num-new-1, 1] == 1:
+            count = count + 1
+            filledin[num, :] = data[num-new, :]
+        elif data[num - new, 1]-data[num - new - 1, 1] > 1:
+            new = new + 1
+            iba = int(data[num - new+1, 1]-data[num - new, 1])
+            togoin = data[num - new]
+            togoin[1] = togoin[1] + 1
+            filledin[num, :] = togoin
+            # dataset[2] = np.insert(dataset[2], [num + new - 2], togoin, axis=0)
+
+        else:
+            other = other + 1
+        tot = count + new + other
+
+    return filledin
+
+
+def MSD_iteration(folder, name, cut, totvids, conversion, frame_m, suffix):
+    """
+
+    """
+
+    tau_m = frame_m - 1
+    great = 10000
+    filtered = False
+    new_method = True
+    tofilt = np.array([])
+    trajectory = dict()
+
+    for num in range(1, totvids + 1):
+        trajectory[num] = np.genfromtxt(folder+'Traj_{}_{}.tif.csv'.format(name, num), delimiter=",")
+        trajectory[num] = np.delete(trajectory[num], 0, 1)
+
+    parts = dict()
+    tots = dict()
+    newtots = dict()
+    newtots[0] = 0
+    tlen = dict()
+    tlength = dict()
+    tlength[0] = 0
+
+    for num in range(1, totvids + 1):
+        tots[num] = trajectory[num][-1, 0].astype(np.int64)
+        parts[num] = tots[num]
+        counter = 1
+        newtots[num] = newtots[num-1] + tots[num]
+
+        tlen[num] = trajectory[num].shape[0]
+        tlength[num] = tlength[num-1] + tlen[num]
+
+    placeholder = np.zeros((tlength[totvids], 11))
+
+    for num in range(1, totvids + 1):
+        placeholder[tlength[num-1]:tlength[num], :] = trajectory[num]
+        placeholder[tlength[num-1]:tlength[num], 0] = placeholder[tlength[num-1]:tlength[num], 0] + newtots[num-1]
+
+    rawframes = placeholder[:, 1]
+    frames = np.linspace(min(rawframes), max(rawframes), max(rawframes)+1).astype(np.int64)
+    time = frames / conversion[1]
+
+    x = dict()
+    y = dict()
+
+    xs = dict()
+    ys = dict()
+
+    # M1x = dict() # MSD dictionaries (without shifting)
+    # M1y = dict()
+    # M2xy = dict()
+
+    SM1x = dict()  # Shifted MSD dictionaries.
+    SM1y = dict()
+    SM2xy = dict()
+
+    SD1x = dict()  # Shifted diffusion coefficient dictionaries.
+    SD1y = dict()
+    SD2xy = dict()
+
+    dataset = dict()
+    rawdataset = np.zeros(placeholder.shape)
+    particles = placeholder[:, 0]
+    total = int(max(particles))
+    total1 = total + 1
+    rawdataset = placeholder[:, :]
+
+    fixed = np.zeros(placeholder.shape)
+    fixed[:, 0:2] = rawdataset[:, 0:2]
+    fixed[:, 2:4] = conversion[0] * rawdataset[:, 2:4]
+    fixed[:, 4] = conversion[2] * rawdataset[:, 4]
+
+    for num in range(1, total1):
+
+        hold = np.where(particles == num)
+        itindex = hold[0]
+        min1 = min(itindex)
+        max1 = max(itindex)
+        dataset[num] = (fixed[min1:max1+1, 0:5])
+
+    I = dict()
+
+    for num in range(1, total1):
+        # Construct x, y, z
+        dataset[num] = fillin2(dataset[num])
+        x[num] = np.zeros(frames.shape[0])
+        x[num][int(dataset[num][0, 1]):int(dataset[num][-1, 1])+1] = dataset[num][:, 2]
+        y[num] = np.zeros(frames.shape[0])
+        y[num][int(dataset[num][0, 1]):int(dataset[num][-1, 1])+1] = dataset[num][:, 3]
+
+        xs[num] = np.zeros(frames.shape[0])
+        xs[num][0:int(dataset[num][-1, 1])+1-int(dataset[num][0, 1])] = dataset[num][:, 2]
+        ys[num] = np.zeros(frames.shape[0])
+        ys[num][0:int(dataset[num][-1, 1])+1-int(dataset[num][0, 1])] = dataset[num][:, 3]
+
+    cutoff = cut
+
+    x1 = dict()
+    y1 = dict()
+
+    xs1 = dict()
+    ys1 = dict()
+
+    fifties = 0
+    nones = 0
+
+    for num in range(1, total1):
+        if np.count_nonzero(x[num]) < cutoff:
+            nones = nones + 1
+        else:
+            fifties = fifties + 1
+            x1[num - nones] = x[num]
+            y1[num - nones] = y[num]
+
+            xs1[num - nones] = xs[num]
+            ys1[num - nones] = ys[num]
+
+    x = x1
+    y = y1
+
+    xs = xs1
+    ys = ys1
+
+    for num in range(1, fifties):
+        xs[num] = ma.masked_equal(xs[num], 0)
+        ys[num] = ma.masked_equal(ys[num], 0)
+
+        x[num] = ma.masked_equal(x[num], 0)
+        y[num] = ma.masked_equal(y[num], 0)
+
+    total1 = fifties + 1
+
+    print('Total particles after merging datasets and filtering short trajectories:', fifties)
+
+    xymask = dict()
+
+    return frames, total1, xs, ys, x, y
+
+
+def vectorized_MMSD_calcs(frames, total1, xs, ys, x, y, frame_m):
+    xs_m = np.zeros((frames.shape[0], total1-1))
+    ys_m = np.zeros((frames.shape[0], total1-1))
+    x_m = np.zeros((frames.shape[0], total1-1))
+    y_m = np.zeros((frames.shape[0], total1-1))
+
+    SM1x = np.zeros((frames.shape[0], total1-1))
+    SM1y = np.zeros((frames.shape[0], total1-1))
+    SM2xy = np.zeros((frames.shape[0], total1-1))
+
+    for i in range(1, total1):
+        xs_m[:, i - 1] = xs[i]
+        ys_m[:, i - 1] = ys[i]
+        x_m[:, i - 1] = x[i]
+        y_m[:, i - 1] = y[i]
+
+    xs_m = ma.masked_equal(xs_m, 0)
+    ys_m = ma.masked_equal(ys_m, 0)
+
+    x_m = ma.masked_equal(x_m, 0)
+    y_m = ma.masked_equal(y_m, 0)
+
+    geoM1x = np.zeros(frame_m)
+    geoM1y = np.zeros(frame_m)
+
+    for frame in range(1, frame_m):
+        bx = xs_m[frame, :]
+        cx = xs_m[:-frame, :]
+        Mx = (bx - cx)**2
+
+        Mxa = np.mean(Mx, axis=0)
+        Mxab = stat.gmean(Mxa, axis=0)
+
+        geoM1x[frame] = Mxab
+
+        by = ys_m[frame, :]
+        cy = ys_m[:-frame, :]
+        My = (by - cy)**2
+
+        Mya = np.mean(My, axis=0)
+        Myab = stat.gmean(Mya, axis=0)
+
+        geoM1y[frame] = Myab
+        SM1x[frame, :] = Mxa
+        SM1y[frame, :] = Mya
+
+    geoM2xy = geoM1x + geoM1y
+    SM2xy = SM1x + SM1y
+
+    return geoM1x, geoM1y, geoM2xy, SM1x, SM1y, SM2xy
