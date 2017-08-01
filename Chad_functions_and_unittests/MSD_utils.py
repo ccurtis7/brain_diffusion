@@ -5,8 +5,7 @@ import numpy.ma as ma
 import scipy.stats as stat
 
 
-def get_data_gels(channels, surface_functionalities, media, concentrations, replicates, path):
-
+def get_data_gels(channels, surface_functionalities, slices, path):
     """
     Loads data from csv files and outputs a dictionary following a specified
         sample naming convection determined by the input
@@ -30,19 +29,112 @@ def get_data_gels(channels, surface_functionalities, media, concentrations, repl
 
     for channel in channels:
         for surface_functionality in surface_functionalities:
-            for medium in media:
-                for concentration in concentrations:
-                    test_value = "{}_{}_{}_{}".format(channel, surface_functionality, medium, concentration)
-                    avg_sets[counter] = test_value
-                    counter = counter + 1
-                    for replicate in replicates:
-                        sample_name = "{}_{}_{}_{}_{}".format(channel, surface_functionality, medium, concentration, replicate)
-                        filename = path.format(channel=channel, surface_functionality=surface_functionality, medium=medium,
-                                               concentration=concentration, replicate=replicate, sample_name=sample_name)
-                        data[sample_name] = np.genfromtxt(filename,
-                                                          delimiter=",")
+            test_value = "{}_{}_{}".format(channel, surface_functionality, base)
+            avg_sets[counter] = test_value
+            counter = counter + 1
+            for slic in slices:
+                sample_name = "{}_{}_{}_{}".format(channel, surface_functionality, base, slic)
+                filename = path.format(channel=channel, functionality=surface_functionality, slic=slic, sample_name=sample_name)
+                data[sample_name] = np.genfromtxt(filename, delimiter=",")
 
     return data, avg_sets
+
+
+def data_prep_for_plotting_gels(path, frames, SD_frames, conversion, to_frame, parameters):
+    """
+    A summary function that preps my mean mean squared displacement data for graphing by performing averages over slices,
+    creates time arrays, calculates standard deviations, and organized nomenclature.
+
+    Inputs:
+
+    path: string. A path to where the MMSD data resides e.g. path = "./{genotype}/geoM2xy_{sample_name}.csv"
+    frames: integer.  Number of frames expected in MMSD datasets e.g. frames = 60
+    SD_frames: array of integers.  Desired frames at which to plot standard deviation bars e.g. SD_frames = [1, 7, 14, 15]
+    conversion: list of three floats.  First is the microns per pixel, second is the frames per second, and third is the microns
+        per slice e.g. conversion = (0.3, 3.95, 1)
+    to_frame: integer.  Frame to which you which to plot.
+    parameters: a dictionary of the form:
+
+    parameters = {}
+    parameters["channels"] = ["RED"]
+    parameters["genotypes"] = ["WT"]
+    parameters["pups"] = ["P1", "P2", "P3"]
+    parameters["surface functionalities"] = ["PEG"]
+    parameters["slices"] = ["S1", "S2", "S3"]
+    parameters["regions"] = ["cortex", "mid"]
+    parameters["replicates"] = [1, 2, 3, 4, 5]
+
+    Outputs:
+
+    data: dictionary of arrays, with keys being names of individual datasets and entries being the MSDs of the datasets.
+    avg_over_slices: numbered dictionary with entries being names of datasets averaged over slices.
+    names_with_replicates: numbered dictionaries with entries being raw names of datasets (original names without
+        averaging over replicates.)
+    time: array.  Time array calculated based on frames and frames per second conversion.
+    time_SD: array.  Time array with entries at times when standard deviations are calculated.
+    average_over_slices: dictionary of arrays containing data averaged over slices.
+    all_SD_over_slices: dictionary of arrays containing standard deviations calculated over slices.
+
+    """
+
+    data, avg_over_slices = get_data_gels(parameters["channels"], parameters["surface functionalities"], parameters["slices"], path)
+    time, time_SD = build_time_array(frames, conversion, SD_frames)
+    average_over_slices = avg_all(data, frames, avg_over_slices)
+    all_SD_over_slices = SD_all(data, frames, SD_frames, avg_over_slices)
+
+    return data, avg_over_slices, time, time_SD, average_over_slices, all_SD_over_slices
+
+
+def plot_all_MSD_histograms_gels(parameters, folder, dataset, time, bins, desired_time, diffusion_data=False, dimension="2D",
+                                 set_y_limit=False, y_range=40, set_x_limit=False, x_range=40):
+    """
+    This function plots histograms for all datasets in an experiment.  The output from calculate_MMSDs
+    is used as an input to this function.
+
+    Inputs:
+    parameters: dictionary of form:
+
+    parameters = {}
+    parameters["channels"] = ["RED", "YG"]
+    parameters["genotypes"] = ["KO"]
+    parameters["pups"] = ["P1", "P2", "P3"]
+    parameters["surface functionalities"] = ["PEG"]
+    parameters["slices"] = ["S1", "S2", "S3"]
+    parameters["regions"] = ["cortex", "mid"]
+    parameters["replicates"] = [1, 2, 3, 4, 5]
+
+    dataset: dictionary of dictionaries of arrays of floats.  Contains MSD data with keys corresponding to
+        (1) sample names and (2) particle numbers. Use output from calculate_MMSDs preferably.
+    time: array of floats.  Contains corresponding time data. Must be same for all particles in MSD dictionary.
+        Must also be one unit longer than MSD datasets.
+    bins: integer or array. desired number of bins.
+    filename: string.  desired name of file.  File will automatically be saved as a PNG.
+    desired_time: float.  Time at which to measure MSDs for histogram.
+    diffusion_data: True/False.  If true, will plot diffusion data instead of MSD data.
+    dimension: string.  1D, 2D, or 3D.
+    set_y_limit: True/False.  Option to manually set the y limit of graph.
+    y_range: float.  Manually set y limit.
+    set_x_limit: True/False.  Option to manually set the x limit of graph.
+    x_range: float. Manually set x limit.
+    """
+
+    channels = parameters["channels"]
+    surface_functionalities = parameters["surface functionalities"]
+    slices = parameters["slices"]
+
+    for channel in channels:
+            for surface_functionality in surface_functionalities:
+                slice_counter = 0
+                for slic in slices:
+
+                    sample_name = "{}_{}_{}_{}".format(channel, surface_functionality, base, slic)
+                    # print("name is", sample_name)
+                    Hplot = folder.format(functionality=surface_functionality, slic=slic)+'{}_Hplot'.format(sample_name)
+
+                    plt.gcf().clear()
+                    plot_MSD_histogram(dataset[sample_name], time, bins, Hplot, desired_time, diffusion_data=diffusion_data,
+                                       dimension=dimension, set_y_limit=set_y_limit, y_range=y_range,
+                                       set_x_limit=set_x_limit, x_range=x_range)
 
 
 def build_time_array(frames=90, conversion=(0.16, 9.89, 1), SD_frames=[1, 7, 14]):
