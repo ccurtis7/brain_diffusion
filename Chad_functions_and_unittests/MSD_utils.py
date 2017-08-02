@@ -5,7 +5,7 @@ import numpy.ma as ma
 import scipy.stats as stat
 
 
-def get_data_gels(channels, surface_functionalities, slices, path):
+def get_data_gels(channels, surface_functionalities, slices, base, path):
     """
     Loads data from csv files and outputs a dictionary following a specified
         sample naming convection determined by the input
@@ -40,7 +40,7 @@ def get_data_gels(channels, surface_functionalities, slices, path):
     return data, avg_sets
 
 
-def data_prep_for_plotting_gels(path, frames, SD_frames, conversion, to_frame, parameters):
+def data_prep_for_plotting_gels(path, frames, SD_frames, conversion, to_frame, parameters, base):
     """
     A summary function that preps my mean mean squared displacement data for graphing by performing averages over slices,
     creates time arrays, calculates standard deviations, and organized nomenclature.
@@ -77,7 +77,7 @@ def data_prep_for_plotting_gels(path, frames, SD_frames, conversion, to_frame, p
 
     """
 
-    data, avg_over_slices = get_data_gels(parameters["channels"], parameters["surface functionalities"], parameters["slices"], path)
+    data, avg_over_slices = get_data_gels(parameters["channels"], parameters["surface functionalities"], parameters["slices"], base, path)
     time, time_SD = build_time_array(frames, conversion, SD_frames)
     average_over_slices = avg_all(data, frames, avg_over_slices)
     all_SD_over_slices = SD_all(data, frames, SD_frames, avg_over_slices)
@@ -85,7 +85,7 @@ def data_prep_for_plotting_gels(path, frames, SD_frames, conversion, to_frame, p
     return data, avg_over_slices, time, time_SD, average_over_slices, all_SD_over_slices
 
 
-def plot_all_MSD_histograms_gels(parameters, folder, dataset, time, bins, desired_time, diffusion_data=False, dimension="2D",
+def plot_all_MSD_histograms_gels(parameters, base, folder, dataset, time, bins, desired_time, diffusion_data=False, dimension="2D",
                                  set_y_limit=False, y_range=40, set_x_limit=False, x_range=40):
     """
     This function plots histograms for all datasets in an experiment.  The output from calculate_MMSDs
@@ -719,7 +719,7 @@ def plot_traj_length_histogram(length, total, lenplot):
     return hist, total1
 
 
-def plot_traj(xts, yts, total, T2plot):
+def plot_traj(xts, yts, total, interv, T2plot):
     """
     This function plots the trajectories of the particles as they were originally caught on the
     microscope (no centering performed).
@@ -753,8 +753,8 @@ def plot_traj(xts, yts, total, T2plot):
                  ax.get_xticklabels() + ax.get_yticklabels()):
         item.set_fontsize(70)
 
-    xmajor_ticks = np.arange(0, both_max, 20)
-    ymajor_ticks = np.arange(0, both_max, 20)
+    xmajor_ticks = np.arange(0, both_max, interv)
+    ymajor_ticks = np.arange(0, both_max, interv)
 
     ax.set_xticks(xmajor_ticks)
     ax.set_yticks(ymajor_ticks)
@@ -903,7 +903,7 @@ def plot_trajectory_overlay(x, y, graph_size, ticks, number_of_trajectories, Tpl
     plt.savefig('{}.png'.format(Tplot), bbox_inches='tight')
 
 
-def quality_control(path2, folder, frames, conversion, parameters, cut):
+def quality_control(path2, folder, frames, conversion, parameters, interv, cut):
     """
     This function plots a histogram of trajectory lengths (in units of frames) and two types of plots of
     trajectories (original and overlay).
@@ -1057,7 +1057,7 @@ def quality_control(path2, folder, frames, conversion, parameters, cut):
 
                                     tlength[counter2][num - 1] = ma.count(x_adjusted_frames[counter2][num])
 
-                                plot_traj(x_original_frames[counter2], y_original_frames[counter2], total[counter2], T2plot)
+                                plot_traj(x_original_frames[counter2], y_original_frames[counter2], total[counter2], interv, T2plot)
                                 plt.gcf().clear()
                                 plot_trajectory_overlay(x_original_frames[counter2], y_original_frames[counter2], 6, 2, 6, Tplot)
                                 plt.gcf().clear()
