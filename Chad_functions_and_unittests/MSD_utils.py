@@ -137,6 +137,204 @@ def plot_all_MSD_histograms_gels(parameters, base, folder, dataset, time, bins, 
                                        set_x_limit=set_x_limit, x_range=x_range)
 
 
+def quality_control_gels(path2, folder, frames, conversion, parameters, base, interv, cut):
+    """
+    This function plots a histogram of trajectory lengths (in units of frames) and two types of plots of
+    trajectories (original and overlay).
+
+    Inputs:
+    path2: string.  Name of input trajectory csv files.
+    folder: string. Name of folder to which to save results.
+    frames: integer.  Total number of frames in videos.
+    conversion: array.  Contains microns per pixel and frames per second of videos.
+    parameters:
+
+    parameters = {}
+    parameters["channels"] = ["RED"]
+    parameters["surface functionalities"] = ["PEG"]
+    parameters["slices"] = ["S1", "S2", "S3"]
+    parameters["replicates"] = [1, 2, 3, 4]
+
+    cut: integer.  Minimum number of frames a trajectory must have in order to be plotted.
+    """
+
+    channels = parameters["channels"]
+    surface_functionalities = parameters["surface functionalities"]
+    slices = parameters["slices"]
+    replicates = parameters["replicates"]
+    SD_frames = [1, 7, 14, 15]
+
+    trajectory = {}
+    names_with_replicates = {}
+    data = {}
+
+    particles_unfiltered = {}
+    framed_unfiltered = {}
+    x_data_unfiltered = {}
+    y_data_unfiltered = {}
+    total_unfiltered = {}
+    particles = {}
+    framed = {}
+    x_data = {}
+    y_data = {}
+    total = {}
+    tlength = {}
+    x_microns = {}
+    y_microns = {}
+    x_particle = {}
+    y_particle = {}
+
+    x_original_frames = {}
+    y_original_frames = {}
+
+    x_adjusted_frames = {}
+    y_adjusted_frames = {}
+
+    counter2 = 0
+
+    for channel in channels:
+            for surface_functionality in surface_functionalities:
+                        for slic in slices:
+                            for replicate in replicates:
+                                # Establishing sample names and extracting data from csv files.
+                                counter2 = counter2 + 1
+                                sample_name_long = "{}_{}_{}_{}_{}".format(channel, surface_functionality, base, slic, replicate)
+                                names_with_replicates[counter2] = sample_name_long
+
+                                filename = path2.format(functionality=surface_functionality, slic=slic, sample_name=sample_name_long)
+                                data[sample_name_long] = np.genfromtxt(filename, delimiter=",")
+                                data[sample_name_long] = np.delete(data[sample_name_long], 0, 1)
+
+                                # Names of output plots
+                                fold = folder.format(functionality=surface_functionality, slic=slic)
+                                logplot = fold + '{}_logplot'.format(sample_name_long)
+                                Mplot = fold + '{}_Mplot'.format(sample_name_long)
+                                Dplot = fold + '{}_Dplot'.format(sample_name_long)
+                                Hplot = fold + '{}_Hplot'.format(sample_name_long)
+                                Hlogplot = fold + '{}_Hlogplot'.format(sample_name_long)
+                                Cplot = fold + '{}_Cplot'.format(sample_name_long)
+                                Tplot = fold + '{}_Tplot'.format(sample_name_long)
+                                T2plot = fold + '{}_T2plot'.format(sample_name_long)
+                                lenplot = fold + '{}_lenplot'.format(sample_name_long)
+
+                                # Fill in data and split into individual trajectories
+                                particles_unfiltered[counter2], framed_unfiltered[counter2], x_data_unfiltered[counter2],\
+                                    y_data_unfiltered[counter2] = fill_in_and_split(data[names_with_replicates[counter2]])
+
+                                total_unfiltered[counter2] = int(max(particles_unfiltered[counter2]))
+
+                                # Filter out short trajectories
+                                particles[counter2], framed[counter2], x_data[counter2], y_data[counter2] =\
+                                    filter_out_short_traj(particles_unfiltered[counter2], framed_unfiltered[counter2],
+                                                          x_data_unfiltered[counter2], y_data_unfiltered[counter2], cut)
+
+                                # Convert to microns and seconds
+                                time, time_SD = build_time_array(frames, conversion, SD_frames)
+                                framen = np.linspace(0, frames, frames+1).astype(np.int64)
+                                total[counter2] = int(max(particles[counter2]))
+                                tlength[counter2] = np.zeros(total[counter2])
+
+                                x_microns[counter2] = x_data[counter2]*conversion[0]
+                                y_microns[counter2] = y_data[counter2]*conversion[0]
+
+                                # Adjust frames (probably unneccesary, but I did it...)
+                                x_particle[counter2] = {}
+                                y_particle[counter2] = {}
+
+                                x_original_frames[counter2] = {}
+                                y_original_frames[counter2] = {}
+
+                                x_adjusted_frames[counter2] = {}
+                                y_adjusted_frames[counter2] = {}
+
+                                for num in range(1, total[counter2] + 1):
+                                    hold = np.where(particles[counter2] == num)
+                                    itindex = hold[0]
+                                    min1 = min(itindex)
+                                    max1 = max(itindex)
+                                    x_particle[counter2][num] = x_microns[counter2][min1:max1+1]
+                                    y_particle[counter2][num] = y_microns[counter2][min1:max1+1]
+
+                                    x_original_frames[counter2][num] = np.zeros(frames + 1)
+                                    y_original_frames[counter2][num] = np.zeros(frames + 1)
+                                    x_adjusted_frames[counter2][num] = np.zeros(frames + 1)
+                                    y_adjusted_frames[counter2][num] = np.zeros(frames + 1)
+
+                                    x_original_frames[counter2][num][framed[counter2][min1]:framed[counter2][max1]+1]\
+                                        = x_microns[counter2][min1:max1+1]
+                                    y_original_frames[counter2][num][framed[counter2][min1]:framed[counter2][max1]+1]\
+                                        = y_microns[counter2][min1:max1+1]
+
+                                    x_adjusted_frames[counter2][num][0:max1+1-min1] = x_microns[counter2][min1:max1+1]
+                                    y_adjusted_frames[counter2][num][0:max1+1-min1] = y_microns[counter2][min1:max1+1]
+
+                                    x_original_frames[counter2][num] = ma.masked_equal(x_original_frames[counter2][num], 0)
+                                    y_original_frames[counter2][num] = ma.masked_equal(y_original_frames[counter2][num], 0)
+                                    x_adjusted_frames[counter2][num] = ma.masked_equal(x_adjusted_frames[counter2][num], 0)
+                                    y_adjusted_frames[counter2][num] = ma.masked_equal(y_adjusted_frames[counter2][num], 0)
+
+                                    tlength[counter2][num - 1] = ma.count(x_adjusted_frames[counter2][num])
+
+                                plot_traj(x_original_frames[counter2], y_original_frames[counter2], total[counter2], interv, T2plot)
+                                plt.gcf().clear()
+                                plot_trajectory_overlay(x_original_frames[counter2], y_original_frames[counter2], 6, 2, 6, Tplot)
+                                plt.gcf().clear()
+                                plot_traj_length_histogram(tlength[counter2], max(tlength[counter2]), lenplot)
+                                plt.gcf().clear()
+
+
+def calculate_diffusion_coefficients_gels(channels, surface_functionalities, slices, path, time, time_to_calculate, to_frame, dimension):
+
+    """
+    Loads data from csv files and outputs a dictionary following a specified
+        sample naming convection determined by the input
+
+    Parameters:
+    channels, surface functionalities, media, and concentrations, and replicates
+        can take ranges or lists.
+    path is string with substition placeholders for concentration and sample
+        name (built from channels, surface_functionalities, media,
+        concentrations, and replicates).
+
+    Example:
+    path = "./{genotype}/{pup}/{region}/{channel}/geoM2xy_{sample_name}.csv";
+    get_data(["RED", "YG"], ["WT", "KO", "HET"], ["P1", "P2", "P3", "P4"],
+    ["PEG", "noPEG"], ["S1", "S2", "S3", "S4"], ["cortex", "hipp", "mid"],
+    [1, 2, 3, 4, 5], path)
+    """
+
+    data = {}
+    avg_over_slices_raw = {}
+    avg_over_pups_raw = {}
+    names_with_replicates = {}
+    counter = 0
+    counter2 = 0
+
+    diffusion_coef_point_derivative = {}
+    diffusion_coef_linear_fit = {}
+
+    for channel in channels:
+        for surface_functionality in surface_functionalities:
+            for slic in slices:
+                test_value = "{}_{}_0-4p_agarose_{}".format(channel, surface_functionality, slic)
+                avg_over_slices_raw[counter] = test_value
+                counter = counter + 1
+                sample_name = test_value
+                for replicate in replicates:
+                    sample_name_long = test_value + "_{}".format(replicate)
+                    names_with_replicates[counter2] = sample_name_long
+                    counter2 = counter2 + 1
+                filename = path.format(functionality=surface_functionality, slic=slic, sample_name=sample_name)
+                data[sample_name] = np.genfromtxt(filename, delimiter=",")
+
+                diffusion_coef_point_derivative[sample_name] =\
+                    diffusion_coefficient_point_derivative(data[sample_name], time, time_to_calculate, dimension)
+                diffusion_coef_linear_fit[sample_name] =\
+                    diffusion_coefficient_linear_regression(data[sample_name], time, to_frame, dimension)
+
+    return diffusion_coef_point_derivative, diffusion_coef_linear_fit
+
+
 def build_time_array(frames=90, conversion=(0.16, 9.89, 1), SD_frames=[1, 7, 14]):
     """
     Builds (1) a time array based on the desire number of frames and the fps and (2) a shortened time array at which the
