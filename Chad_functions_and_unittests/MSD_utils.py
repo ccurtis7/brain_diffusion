@@ -1944,34 +1944,25 @@ def fillin2(data):
     return filledin
 
 
-def MSD_iteration(folder, name, cut, totvids, conversion, frame_m, suffix):
+def MSD_iteration(folder, name, cut, totvids, conversion, frames):
+    """
+    Cleans up data for MSD analysis from csv files.  Outputs in form of
+    dictionaries.
     """
 
-    """
-
-    tau_m = frame_m - 1
-    great = 10000
-    filtered = False
-    new_method = True
-    tofilt = np.array([])
     trajectory = dict()
-
-    for num in range(1, totvids + 1):
-        trajectory[num] = np.genfromtxt(folder+'Traj_{}_{}.tif.csv'.format(name, num), delimiter=",")
-        trajectory[num] = np.delete(trajectory[num], 0, 1)
-
-    parts = dict()
-    tots = dict()
-    newtots = dict()
+    tots = dict()  # Total particles in each video
+    newtots = dict()  # Cumulative total particles.
     newtots[0] = 0
     tlen = dict()
     tlength = dict()
     tlength[0] = 0
 
     for num in range(1, totvids + 1):
+        trajectory[num] = np.genfromtxt(folder+'Traj_{}_{}.tif.csv'.format(name, num), delimiter=",")
+        trajectory[num] = np.delete(trajectory[num], 0, 1)
+
         tots[num] = trajectory[num][-1, 0].astype(np.int64)
-        parts[num] = tots[num]
-        counter = 1
         newtots[num] = newtots[num-1] + tots[num]
 
         tlen[num] = trajectory[num].shape[0]
@@ -1982,28 +1973,6 @@ def MSD_iteration(folder, name, cut, totvids, conversion, frame_m, suffix):
     for num in range(1, totvids + 1):
         placeholder[tlength[num-1]:tlength[num], :] = trajectory[num]
         placeholder[tlength[num-1]:tlength[num], 0] = placeholder[tlength[num-1]:tlength[num], 0] + newtots[num-1]
-
-    rawframes = placeholder[:, 1]
-    frames = np.linspace(min(rawframes), max(rawframes), max(rawframes)+1).astype(np.int64)
-    time = frames / conversion[1]
-
-    x = dict()
-    y = dict()
-
-    xs = dict()
-    ys = dict()
-
-    # M1x = dict() # MSD dictionaries (without shifting)
-    # M1y = dict()
-    # M2xy = dict()
-
-    SM1x = dict()  # Shifted MSD dictionaries.
-    SM1y = dict()
-    SM2xy = dict()
-
-    SD1x = dict()  # Shifted diffusion coefficient dictionaries.
-    SD1y = dict()
-    SD2xy = dict()
 
     dataset = dict()
     rawdataset = np.zeros(placeholder.shape)
@@ -2017,88 +1986,45 @@ def MSD_iteration(folder, name, cut, totvids, conversion, frame_m, suffix):
     fixed[:, 2:4] = conversion[0] * rawdataset[:, 2:4]
     fixed[:, 4] = conversion[2] * rawdataset[:, 4]
 
+    x = np.zeros((frames, total1 - 1))
+    y = np.zeros((frames, total1 - 1))
+    xs = np.zeros((frames, total1 - 1))
+    ys = np.zeros((frames, total1 - 1))
+
+    nones = 0
+    cutoff = cut
     for num in range(1, total1):
 
         hold = np.where(particles == num)
         itindex = hold[0]
         min1 = min(itindex)
         max1 = max(itindex)
-        dataset[num] = (fixed[min1:max1+1, 0:5])
 
-    I = dict()
-
-    for num in range(1, total1):
-        # Construct x, y, z
-        dataset[num] = fillin2(dataset[num])
-        x[num] = np.zeros(frames.shape[0])
-        x[num][int(dataset[num][0, 1]):int(dataset[num][-1, 1])+1] = dataset[num][:, 2]
-        y[num] = np.zeros(frames.shape[0])
-        y[num][int(dataset[num][0, 1]):int(dataset[num][-1, 1])+1] = dataset[num][:, 3]
-
-        xs[num] = np.zeros(frames.shape[0])
-        xs[num][0:int(dataset[num][-1, 1])+1-int(dataset[num][0, 1])] = dataset[num][:, 2]
-        ys[num] = np.zeros(frames.shape[0])
-        ys[num][0:int(dataset[num][-1, 1])+1-int(dataset[num][0, 1])] = dataset[num][:, 3]
-
-    cutoff = cut
-
-    x1 = dict()
-    y1 = dict()
-
-    xs1 = dict()
-    ys1 = dict()
-
-    fifties = 0
-    nones = 0
-
-    for num in range(1, total1):
-        if np.count_nonzero(x[num]) < cutoff:
+        if max1 - min1 < cutoff:
             nones = nones + 1
         else:
-            fifties = fifties + 1
-            x1[num - nones] = x[num]
-            y1[num - nones] = y[num]
+            holdplease = fillin2(fixed[min1:max1+1, 0:5])
+            x[int(holdplease[0, 1]):int(holdplease[-1, 1])+1, num - nones - 1] = holdplease[:, 2]
+            y[int(holdplease[0, 1]):int(holdplease[-1, 1])+1, num - nones - 1] = holdplease[:, 3]
 
-            xs1[num - nones] = xs[num]
-            ys1[num - nones] = ys[num]
+            xs[0:int(holdplease[-1, 1])+1-int(holdplease[0, 1]), num - nones - 1] = holdplease[:, 2]
+            ys[0:int(holdplease[-1, 1])+1-int(holdplease[0, 1]), num - nones - 1] = holdplease[:, 3]
 
-    x = x1
-    y = y1
+    total1 = total1 - nones - 1
+    x_m = x[:, :total1-1]
+    y_m = y[:, :total1-1]
+    xs_m = xs[:, :total1-1]
+    ys_m = ys[:, :total1-1]
 
-    xs = xs1
-    ys = ys1
-
-    for num in range(1, fifties):
-        xs[num] = ma.masked_equal(xs[num], 0)
-        ys[num] = ma.masked_equal(ys[num], 0)
-
-        x[num] = ma.masked_equal(x[num], 0)
-        y[num] = ma.masked_equal(y[num], 0)
-
-    total1 = fifties + 1
-
-    print('Total particles after merging datasets and filtering short trajectories:', fifties)
-
-    xymask = dict()
-
-    return frames, total1, xs, ys, x, y
+    print('Total particles after merging datasets and filtering short trajectories:', total1)
+    return total1, xs_m, ys_m, x_m, y_m
 
 
-def vectorized_MMSD_calcs(frames, total1, xs, ys, x, y, frame_m):
-    xs_m = np.zeros((frames.shape[0], total1-1))
-    ys_m = np.zeros((frames.shape[0], total1-1))
-    x_m = np.zeros((frames.shape[0], total1-1))
-    y_m = np.zeros((frames.shape[0], total1-1))
+def vectorized_MMSD_calcs(frames, total1, xs_m, ys_m, x_m, y_m, frame_m):
 
-    SM1x = np.zeros((frames.shape[0], total1-1))
-    SM1y = np.zeros((frames.shape[0], total1-1))
-    SM2xy = np.zeros((frames.shape[0], total1-1))
-
-    for i in range(1, total1):
-        xs_m[:, i - 1] = xs[i]
-        ys_m[:, i - 1] = ys[i]
-        x_m[:, i - 1] = x[i]
-        y_m[:, i - 1] = y[i]
+    SM1x = np.zeros((frames, total1-1))
+    SM1y = np.zeros((frames, total1-1))
+    SM2xy = np.zeros((frames, total1-1))
 
     xs_m = ma.masked_equal(xs_m, 0)
     ys_m = ma.masked_equal(ys_m, 0)
