@@ -231,18 +231,18 @@ quotient = divmod(total1, size)
 local_n = quotient[0]
 particles_lost = quotient[1]
 
-exists = os.path.isfile('pM1xa_{}.csv'.format(rank))
+exists = os.path.isfile('pM1xc_{}.csv'.format(rank))
 
 if exists == False:
     last_size = 1
-    with open('pM1xa_{}.csv'.format(rank), "wb") as f_handle:
+    with open('pM1xc_{}.csv'.format(rank), "wb") as f_handle:
         pass
-    with open('pM1ya_{}.csv'.format(rank), "wb") as f_handle:
+    with open('pM1yc_{}.csv'.format(rank), "wb") as f_handle:
         pass
-    with open('pM2xya_{}.csv'.format(rank), "wb") as f_handle:
+    with open('pM2xyc_{}.csv'.format(rank), "wb") as f_handle:
         pass
 else:
-    with open('pM1xa_{}.csv'.format(rank), "rb") as f_handle:
+    with open('pM1xc_{}.csv'.format(rank), "rb") as f_handle:
         reader = np.genfromtxt(f_handle, delimiter = ",")
         data = list(reader)
         last_size = data[0].shape[0]
@@ -328,32 +328,32 @@ for num in range(last_size, local_n+1):
     # a2xy[num] = ma.masked_invalid(a2xy[num])
 
     if num == 1:
-        with open('pM1xa_{}.csv'.format(rank), "wb") as f_handle:
+        with open('pM1xc_{}.csv'.format(rank), "wb") as f_handle:
             np.savetxt(f_handle, pSM1x[num], delimiter=",")
 
-        with open('pM1ya_{}.csv'.format(rank), "wb") as f_handle:
+        with open('pM1yc_{}.csv'.format(rank), "wb") as f_handle:
             np.savetxt(f_handle, pSM1y[num], delimiter=",")
 
-        with open('pM2xya_{}.csv'.format(rank), "wb") as f_handle:
+        with open('pM2xyc_{}.csv'.format(rank), "wb") as f_handle:
             np.savetxt(f_handle, pSM2xy[num], delimiter=",")
 
     else:
-        with open('pM1xa_{}.csv'.format(rank), "rb") as f_handle:
+        with open('pM1xc_{}.csv'.format(rank), "rb") as f_handle:
             old_one = np.genfromtxt(f_handle, delimiter=",")
         new = np.column_stack((old_one, pSM1x[num]))
-        with open('pM1xa_{}.csv'.format(rank), "wb") as f_handle:
+        with open('pM1xc_{}.csv'.format(rank), "wb") as f_handle:
             np.savetxt(f_handle, new, delimiter=",")
 
-        with open('pM1ya_{}.csv'.format(rank), "rb") as f_handle:
+        with open('pM1yc_{}.csv'.format(rank), "rb") as f_handle:
             old_one1 = np.genfromtxt(f_handle, delimiter=",")
         new1 = np.column_stack((old_one1, pSM1y[num]))
-        with open('pM1ya_{}.csv'.format(rank), "wb") as f_handle:
+        with open('pM1yc_{}.csv'.format(rank), "wb") as f_handle:
             np.savetxt(f_handle, new1, delimiter=",")
 
-        with open('pM2xya_{}.csv'.format(rank), "rb") as f_handle:
+        with open('pM2xyc_{}.csv'.format(rank), "rb") as f_handle:
             old_one2 = np.genfromtxt(f_handle, delimiter=",")
         new2 = np.column_stack((old_one2, pSM2xy[num]))
-        with open('pM2xya_{}.csv'.format(rank), "wb") as f_handle:
+        with open('pM2xyc_{}.csv'.format(rank), "wb") as f_handle:
             np.savetxt(f_handle, new2, delimiter=",")
 
 
@@ -363,17 +363,17 @@ SM2xy = dict()
 
 if rank == 0:
     for num in range(0, size):
-        with open('pM1xa_{}.csv'.format(num), "rb") as f_handle:
+        with open('pM1xc_{}.csv'.format(num), "rb") as f_handle:
             interim = np.genfromtxt(f_handle, delimiter=",")
         for i in range(1, local_n+1):
             current = local_n*num + i
             SM1x[current] = interim[:, i-1]
-        with open('pM1ya_{}.csv'.format(num), "rb") as f_handle:
+        with open('pM1yc_{}.csv'.format(num), "rb") as f_handle:
             interim1 = np.genfromtxt(f_handle, delimiter=",")
         for i in range(1, local_n+1):
             current = local_n*num + i
             SM1y[current] = interim1[:, i-1]
-        with open('pM2xya_{}.csv'.format(num), "rb") as f_handle:
+        with open('pM2xyc_{}.csv'.format(num), "rb") as f_handle:
             interim2 = np.genfromtxt(f_handle, delimiter=",")
         for i in range(1, local_n+1):
             current = local_n*num + i
