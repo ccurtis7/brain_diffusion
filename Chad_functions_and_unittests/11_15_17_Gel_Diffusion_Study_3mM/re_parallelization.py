@@ -167,8 +167,12 @@ def vectorized_MMSD_calcs(frames, total1, xs_m, ys_m, x_m, y_m, frame_m):
         SM1x[frame, :] = Mxa
         SM1y[frame, :] = Mya
 
-    geoM2xy = np.mean(np.log(Mya+Mxa), axix=0)
-    gSEM = stat.sem(np.log(Mya+Mxa), axis=0)
+    dist = np.log(Mya+Mxa)
+    # unmask = np.invert(ma.getmask(dist))
+    # dist2 = dist[unmask]
+
+    geoM2xy = np.ma.mean(dist, axix=0)
+    gSEM = stat.sem(dist, axis=0)
     SM2xy = SM1x + SM1y
 
     return geoM2xy, gSEM, SM1x, SM1y, SM2xy
