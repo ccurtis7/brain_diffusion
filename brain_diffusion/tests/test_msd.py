@@ -10,7 +10,7 @@ import numpy.ma as ma
 import numpy.linalg as la
 import numpy.testing as npt
 
-from msd import fillin2, MSD_iteration, vectorized_MMSD_calcs
+from brain_diffusion.msd import fillin2, MSD_iteration, vectorized_MMSD_calcs
 
 
 def test_fillin2():

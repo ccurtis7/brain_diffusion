@@ -8,7 +8,7 @@ import scipy.stats as stat
 import numpy as np
 import sys
 import os
-from histogram_utils import histogram_by_video
+from brain_diffusion.histogram_utils import histogram_by_video
 
 
 def test_histogram_by_video():
