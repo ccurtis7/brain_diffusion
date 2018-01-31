@@ -8,9 +8,6 @@ import scipy.stats as stat
 import numpy as np
 import sys
 import os
-
-modulef = 'C:/Users/koolk/Desktop/brain_diffusion/brain_diffusion/histogram/'
-sys.path.insert(0, modulef)
 from histogram_utils import histogram_by_video
 
 
