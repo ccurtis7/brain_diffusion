@@ -4,4 +4,3 @@ pandas
 scikit_image
 random
 matplotlib
-csv
