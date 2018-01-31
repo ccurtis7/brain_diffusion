@@ -9,6 +9,7 @@ import numpy as np
 import sys
 import os
 from brain_diffusion.histogram_utils import histogram_by_video
+import pytest
 
 is_travis = "CI" in os.environ.keys()
 
