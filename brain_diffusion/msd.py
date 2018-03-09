@@ -177,6 +177,7 @@ def MSD_iteration(folder, name, cut=1, totvids=1, conversion=(1, 1, 1)):
 
     for num in range(1, totvids + 1):
         trajectory[num] = np.genfromtxt(folder+'Traj_{}_{}.tif.csv'.format(name, num), delimiter=",")
+        trajectory[num] = np.delete(trajectory[num], 0, 0)
         trajectory[num] = np.delete(trajectory[num], 0, 1)
 
         tots[num] = trajectory[num][-1, 0].astype(np.int64)
