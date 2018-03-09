@@ -203,7 +203,7 @@ frame_m = 70  # atm I can't go lower than the actual value.
 parameters = {}
 parameters["channels"] = ["RED"]
 parameters["surface functionalities"] = ["nPEG"]
-parameters["slices"] = ["S1", "S2", "S3", "S4"]
+parameters["slices"] = [1, 2, 3, 4]
 parameters["videos"] = [1, 2, 3, 4, 5]
 parameters["replicates"] = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
@@ -231,7 +231,7 @@ for channel in channels:
             for video in videos:
                 if rank == check_rank:
                     suffix = suffixes[slice_counter]
-                    sample_name = "well{}_XY{}_{}".format(slic, video)
+                    sample_name = "well{}_XY{}".format(slic, video)
                     DIR = folder
 
                     total1, xs, ys, x, y = MSD_iteration(DIR, sample_name, cut, totvids, conversion, frame_m)
