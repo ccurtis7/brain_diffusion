@@ -36,21 +36,20 @@ def histogram_by_video(SMfilename, xlabel='Log Diffusion Coefficient Dist', ylab
         coefficients.  Any other input will plot the mean squared displacements.
 
     Returns
-    ----------
+    -------
     Returns 'Graph completed successfully' if function is successful.
 
     Examples
-    ----------
-    nframe = 51
-    npar = 1000
-    SMxy = np.zeros((nframe, npar))
-    for frame in range(0, nframe):
-        SMxy[frame, :] = np.random.normal(loc=0.5*frame, scale=0.5, size=npar)
-
-    np.savetxt('sample_file.csv', SMxy, delimiter=',')
-    histogram_by_video('sample_file.csv', y_range=500, analysis="nlog", theta="MSD")
-    os.remove('sample_file.csv')
-    os.remove('sample_file_hist.png')
+    --------
+    >>> nframe = 51
+    >>> npar = 1000
+    >>> SMxy = np.zeros((nframe, npar))
+    >>> for frame in range(0, nframe):
+            SMxy[frame, :] = np.random.normal(loc=0.5*frame, scale=0.5, size=npar)
+    >>> np.savetxt('sample_file.csv', SMxy, delimiter=',')
+    >>> histogram_by_video('sample_file.csv', y_range=500, analysis="nlog", theta="MSD")
+    >>> os.remove('sample_file.csv')
+    >>> os.remove('sample_file_hist.png')
     """
 
     assert type(SMfilename) is str, "SMfilename must be a string"

@@ -12,6 +12,16 @@ MSD calculations are carried out using vectorized numpy arrays.  Calculations
 are carried out according to the formula <MSD> = (x-x0)^2 + (y-y0)^2.  Video-wide
 geometric averages are also reported.
 
+.. container:: toggle
+
+   .. container:: header
+
+      brain_diffusion.msd
+
+   .. container:: content
+
+      .. automodule:: brain_diffusion.msd
+
 .. _hyak-label:
 
 Hyak
@@ -29,3 +39,13 @@ Visualization
 -------------
 
 Current visualization tools include a histogram plot of MSD/Diffusion distributions.
+
+.. container:: toggle
+
+   .. container:: header
+
+      brain_diffusion.histogram_utils
+
+   .. container:: content
+
+      .. automodule:: brain_diffusion.histogram_utils

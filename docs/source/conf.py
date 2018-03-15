@@ -35,6 +35,8 @@ sys.path.append(os.path.join(currentdir, 'tools'))
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('../..'))
+# sys.path.append('/c/Users/koolk/Desktop/brain_diffusion/brain_diffusion')
+sys.path.append(os.path.join(os.path.dirname(__name__), '..'))
 
 # -- General configuration ------------------------------------------------
 
@@ -165,7 +167,7 @@ html_theme_options = {
     'github_repo': 'brain_diffusion',
     'github_type': 'star',
     'show_powered_by': True,
-    'fixed_sidebar': True
+    # 'fixed_sidebar': True
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
