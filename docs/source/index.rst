@@ -3,8 +3,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. _reference:
+
 Welcome to brain_diffusion
 ===========================================
+
+.. automodule:: brain_diffusion
 
 brain_diffusion is a python library designed to analyze and visualize trajectory
 data from the ImageJ plugin `MOSAIC <http://mosaic.mpi-cbg.de/?q=downloads/imageJ>`_.
@@ -38,46 +42,18 @@ Molecular Cell Biology and Genetics in Dresden.  This calculation package is the
 primary tool for MSD calculations of nanoparticles in the brain in the `Nance
 research group <https://www.nancelab.com/>`_ at the University of Washington.
 
-Installation and getting started
---------------------------------
+* :ref:`gen-docs`
+* :ref:`modindex`
+* :ref:`search`
 
-To install brain_diffusion and analyzing your data, visit :ref:`getting-started-label`
-
-Documentation
--------------
-
-For full documentation of brain_diffusion, see :ref:`doc-label`.
-
-Bugs and issues
----------------
-
-If you are having issues, please let us know by `opening a new issue
-<https://github.com/ccurtis7/brain_diffusion/issues>`_.
-Please tag your issues with the "bug" or "question" label.
-
-License
--------
-
-The project is licensed under the `BSD 2-Clause "Simplified" License
-<https://github.com/ccurtis7/brain_diffusion/blob/master/LICENSE>`_.
-
-Acknowledgements
-----------------
-Brain_diffusion development is supported by ....
+.. _gen-docs:
 
 .. toctree::
-   :hidden:
+   :maxdepth: 2
+   :caption: User Documentation
 
    getting started <getting_started>
-   documentation <documentation>
+   api/index <documentation>
    examples <https://github.com/ccurtis7/brain_diffusion/tree/master/brain_diffusion/notebooks>
    code <https://github.com/ccurtis7/brain_diffusion>
    bugs <https://github.com/ccurtis7/brain_diffusion/issues>
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
