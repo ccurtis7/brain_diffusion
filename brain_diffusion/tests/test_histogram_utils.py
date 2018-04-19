@@ -15,6 +15,7 @@ is_travis = "CI" in os.environ.keys()
 
 
 @pytest.mark.skipif(is_travis, reason="This doesn't work on Travis yet.")
+@pytest.mark.skip(reason="no way of currently testing this")
 def test_histogram_by_video():
     nframe = 51
     npar = 1000
